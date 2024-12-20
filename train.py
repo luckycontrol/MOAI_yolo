@@ -134,8 +134,9 @@ def train(hyp, opt, device, callbacks):
         - Datasets: https://github.com/ultralytics/yolov5/tree/master/data
         - Tutorial: https://docs.ultralytics.com/yolov5/tutorials/train_custom_data
     """
-    save_dir, epochs, batch_size, weights, single_cls, evolve, data, cfg, resume, noval, nosave, workers, freeze = (
+    save_dir, save_weight_dir, epochs, batch_size, weights, single_cls, evolve, data, cfg, resume, noval, nosave, workers, freeze = (
         Path(opt.save_dir),
+        opt.save_weight_dir,
         opt.epochs,
         opt.batch_size,
         opt.weights,
@@ -151,8 +152,11 @@ def train(hyp, opt, device, callbacks):
     )
     callbacks.run("on_pretrain_routine_start")
 
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
     # Directories
-    w = save_dir / "weights"  # weights dir
+    w = Path(save_weight_dir)  # weights dir
     (w.parent if evolve else w).mkdir(parents=True, exist_ok=True)  # make dir
     last, best = w / "last.pt", w / "best.pt"
 
@@ -163,6 +167,7 @@ def train(hyp, opt, device, callbacks):
     LOGGER.info(colorstr("hyperparameters: ") + ", ".join(f"{k}={v}" for k, v in hyp.items()))
     opt.hyp = hyp.copy()  # for saving hyps to checkpoints
     
+    # ---------------------------------- Docker Hyperparameters ---------------------------------- #
     opt.hyp['lr0'] = opt.lr
     opt.hyp['lrf'] = opt.lr * 0.01
     
@@ -189,6 +194,7 @@ def train(hyp, opt, device, callbacks):
         opt.hyp['mosaic'] = 0
     else:
         opt.hyp['mosaic'] = 1
+    # ---------------------------------- -------------------------------------------------- ---------------------------------- #
 
     # Save run settings
     if not evolve:
@@ -612,7 +618,7 @@ def parse_opt(known=False):
     parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--multi-scale", action="store_true", help="vary img-size +/- 50%%")
     parser.add_argument("--single-cls", action="store_true", help="train multi-class data as single-class")
-    parser.add_argument("--optimizer", type=str, choices=["SGD", "Adam", "AdamW"], default="SGD", help="optimizer")
+    parser.add_argument("--optimizer", type=str, choices=["SGD", "Adam", "AdamW"], default="AdamW", help="optimizer")
     parser.add_argument("--sync-bn", action="store_true", help="use SyncBatchNorm, only available in DDP mode")
     parser.add_argument("--workers", type=int, default=8, help="max dataloader workers (per RANK in DDP mode)")
 
@@ -637,15 +643,15 @@ def parse_opt(known=False):
     parser.add_argument("--ndjson-file", action="store_true", help="Log ndjson to file")
 
     # Docker YOLO arguments
-    parser.add_argument("--project", default=r"E:/Dev/models/yolov5/yolo", help="save to project/name")
-    parser.add_argument("--name", default=r"sub_project/detection/v1", help="save to project/name")
+    parser.add_argument("--project", default=r"D:\models\MOAI_yolo\yolo\subproject\detection", help="save to project/name") # project + subproject + task
+    parser.add_argument("--name", default=r"v1", help="save to project/name") # version
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="train, val image size (pixels)")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
-    parser.add_argument("--weights", type=str, default=r"E:\Dev\models\yolov5\weights\yolov5m.pt", help="initial weights path")
-    parser.add_argument("--epochs", type=int, default=50, help="total training epochs")
+    parser.add_argument("--weights", type=str, default=r"D:\models\MOAI_yolo\weights\yolov5m.pt", help="initial weights path")
+    parser.add_argument("--epochs", type=int, default=30, help="total training epochs")
     parser.add_argument("--patience", type=int, default=20, help="EarlyStopping patience (epochs without improvement)")
     parser.add_argument("--resume", nargs="?", const=True, default=False, help="resume most recent training")
-    parser.add_argument("--data", type=str, default=r"E:/Dev/models/yolov5/yolo/sub_project/detection/dataset/train_dataset/data.yaml", help="dataset.yaml path")
+    parser.add_argument("--data", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\dataset\train_dataset\data.yaml", help="dataset.yaml path")
     parser.add_argument("--lr", type=float, default=0.0005, help="initial learning rate (SGD=1E-2, Adam=1E-3)")
     parser.add_argument("--hsv", type=bool, default=False, help="use HSV colorspace augmentation")
     parser.add_argument("--degrees", type=float, default=0.0, help="random rotation degree")
@@ -708,7 +714,8 @@ def main(opt, callbacks=Callbacks()):
             opt.exist_ok, opt.resume = opt.resume, False  # pass resume to exist_ok and disable resume
         if opt.name == "cfg":
             opt.name = Path(opt.cfg).stem  # use model.yaml as name
-        opt.save_dir = f"{opt.project}/{opt.name}/training_result"  # save dir
+        opt.save_dir = f"{opt.project}/{opt.name}/training_results"  # save dir
+        opt.save_weight_dir = f"{opt.project}/{opt.name}/weights"
 
     # DDP mode
     device = select_device(opt.device, batch_size=opt.batch_size)

@@ -398,13 +398,13 @@ def parse_opt():
     parser.add_argument("--vid-stride", type=int, default=1, help="video frame-rate stride")
 
     # Docker arguments
-    parser.add_argument("--weights", nargs="+", type=str, default=ROOT / "yolov5s.pt", help="model path or triton URL")
-    parser.add_argument("--source", type=str, default=ROOT / "data/images", help="file/dir/URL/glob/screen/0(webcam)")
+    parser.add_argument("--project", default=r"D:\models\MOAI_yolo\yolo\subproject\detection\v1", help="save results to project/name") # project + subproject + task + version + inference_result
+    parser.add_argument("--name", default="inference_result", help="save results to project/name") # inference_name
+    parser.add_argument("--weights", nargs="+", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\v1\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
+    parser.add_argument("--source", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
     parser.add_argument("--conf-thres", type=float, default=0.25, help="confidence threshold")
-    parser.add_argument("--device", default="", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
-    parser.add_argument("--project", default=ROOT / "runs/detect", help="save results to project/name")
-    parser.add_argument("--name", default="exp", help="save results to project/name")
+    parser.add_argument("--device", default="0" if torch.cuda.is_available() else "cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
 
 
     opt = parser.parse_args()
