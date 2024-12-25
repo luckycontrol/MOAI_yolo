@@ -166,35 +166,6 @@ def train(hyp, opt, device, callbacks):
             hyp = yaml.safe_load(f)  # load hyps dict
     LOGGER.info(colorstr("hyperparameters: ") + ", ".join(f"{k}={v}" for k, v in hyp.items()))
     opt.hyp = hyp.copy()  # for saving hyps to checkpoints
-    
-    # ---------------------------------- Docker Hyperparameters ---------------------------------- #
-    opt.hyp['lr0'] = opt.lr
-    opt.hyp['lrf'] = opt.lr * 0.01
-    
-    if opt.hsv == False:
-        opt.hyp['hsv_h'] = 0
-        opt.hyp['hsv_s'] = 0
-        opt.hyp['hsv_v'] = 0
-    
-    opt.hyp['degrees'] = opt.degrees
-    opt.hyp['translate'] = opt.translate
-    opt.hyp['scale'] = opt.scale
-    
-    if opt.flipud == False:
-        opt.hyp['flipud'] = 0
-    else:
-        opt.hyp['flipud'] = 1
-    
-    if opt.fliplr == False:
-        opt.hyp['fliplr'] = 0
-    else:
-        opt.hyp['fliplr'] = 1
-    
-    if opt.mosaic == False:
-        opt.hyp['mosaic'] = 0
-    else:
-        opt.hyp['mosaic'] = 1
-    # ---------------------------------- -------------------------------------------------- ---------------------------------- #
 
     # Save run settings
     if not evolve:
