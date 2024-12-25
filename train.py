@@ -599,8 +599,6 @@ def parse_opt(known=False):
     parser = argparse.ArgumentParser()
     parser.add_argument("--cfg", type=str, default="", help="model.yaml path")
     
-    parser.add_argument("--hyp", type=str, default=ROOT / "data/hyps/hyp.scratch-low.yaml", help="hyperparameters path")
-    
     parser.add_argument("--rect", action="store_true", help="rectangular training")
     
     parser.add_argument("--nosave", action="store_true", help="only save final checkpoint")
@@ -650,16 +648,9 @@ def parse_opt(known=False):
     parser.add_argument("--weights", type=str, default=r"D:\models\MOAI_yolo\weights\yolov5m.pt", help="initial weights path")
     parser.add_argument("--epochs", type=int, default=30, help="total training epochs")
     parser.add_argument("--patience", type=int, default=20, help="EarlyStopping patience (epochs without improvement)")
-    parser.add_argument("--resume", type=bool, action="store_true", help="resume most recent training")
+    parser.add_argument("--resume", action="store_true", help="resume most recent training")
     parser.add_argument("--data", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\dataset\train_dataset\data.yaml", help="dataset.yaml path")
-    parser.add_argument("--lr", type=float, default=0.0005, help="initial learning rate (SGD=1E-2, Adam=1E-3)")
-    parser.add_argument("--degrees", type=float, default=0.0, help="random rotation degree")
-    parser.add_argument("--translate", type=float, default=0.0, help="random translation ratio")
-    parser.add_argument("--scale", type=float, default=0.0, help="random scale ratio")
-    parser.add_argument("--hsv", type=bool, action='store_true', help="use HSV colorspace augmentation")
-    parser.add_argument("--flipud", type=bool, action='store_true', help="random horizontal flips")
-    parser.add_argument("--fliplr", type=bool, action='store_true', help="random vertical flips")
-    parser.add_argument("--mosaic", type=bool, action='store_true', help="use mosaic augmentation")
+    parser.add_argument("--hyp", type=str, default="/MOAI_yolo/data/hyps/hyp.scratch-low.yaml", help="hyperparameters path")
 
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
