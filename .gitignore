@@ -50,7 +50,6 @@ VOC/
 # Neural Network weights -----------------------------------------------------------------------------------------------
 *.weights
 *.pb
-*.pt
 *.onnx
 *.engine
 *.mlmodel
@@ -258,3 +257,5 @@ crashlytics-build.properties
 fabric.properties
 
 yolo
+
+*.tar
