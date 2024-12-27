@@ -259,7 +259,8 @@ class Loggers:
             file = self.save_dir / "results.csv"
             n = len(x) + 1  # number of cols
             s = "" if file.exists() else (("%20s," * n % tuple(["epoch"] + self.keys)).rstrip(",") + "\n")  # add header
-            
+            print(f"epoch: {epoch}")
+
             # critical section setting
             with file_lock:
                 with open(file, "a") as f:
