@@ -15,6 +15,9 @@ from utils.loggers.wandb.wandb_utils import WandbLogger
 from utils.plots import plot_images, plot_labels, plot_results
 from utils.torch_utils import de_parallel
 
+import threading
+file_lock = threading.Lock()
+
 LOGGERS = ("csv", "tb", "wandb", "clearml", "comet")  # *.csv, TensorBoard, Weights & Biases, ClearML
 RANK = int(os.getenv("RANK", -1))
 
@@ -256,8 +259,12 @@ class Loggers:
             file = self.save_dir / "results.csv"
             n = len(x) + 1  # number of cols
             s = "" if file.exists() else (("%20s," * n % tuple(["epoch"] + self.keys)).rstrip(",") + "\n")  # add header
-            with open(file, "a") as f:
-                f.write(s + ("%20.5g," * n % tuple([epoch] + vals)).rstrip(",") + "\n")
+            
+            # critical section setting
+            with file_lock:
+                with open(file, "a") as f:
+                    f.write(s + ("%20.5g," * n % tuple([epoch] + vals)).rstrip(",") + "\n")
+
         if self.ndjson_console or self.ndjson_file:
             json_data = json.dumps(dict(epoch=epoch, **x), default=_json_default)
         if self.ndjson_console:
