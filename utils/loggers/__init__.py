@@ -15,6 +15,7 @@ from utils.loggers.wandb.wandb_utils import WandbLogger
 from utils.plots import plot_images, plot_labels, plot_results
 from utils.torch_utils import de_parallel
 
+import time
 import threading
 file_lock = threading.Lock()
 
@@ -261,10 +262,16 @@ class Loggers:
             s = "" if file.exists() else (("%20s," * n % tuple(["epoch"] + self.keys)).rstrip(",") + "\n")  # add header
             print(f"epoch: {epoch}")
 
-            # critical section setting
-            with file_lock:
-                with open(file, "a") as f:
-                    f.write(s + ("%20.5g," * n % tuple([epoch] + vals)).rstrip(",") + "\n")
+            for attempt in range(5):
+                try:
+                    # CRITICAL SECTION
+                    with file_lock:
+                        with open(file, "a") as f:
+                            f.write(s + ("%20.5g," * n % tuple([epoch] + vals)).rstrip(",") + "\n")
+                    break
+                except Exception as e:
+                    LOGGER.warning(f"WARNING ⚠️ CSV logging failure {e}")
+                    time.sleep(1.0)
 
         if self.ndjson_console or self.ndjson_file:
             json_data = json.dumps(dict(epoch=epoch, **x), default=_json_default)
