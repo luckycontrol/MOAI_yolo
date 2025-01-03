@@ -34,6 +34,7 @@ import os
 import platform
 import sys
 from pathlib import Path
+import yaml
 
 import torch
 
@@ -65,6 +66,18 @@ from utils.general import (
 )
 from utils.torch_utils import select_device, smart_inference_mode
 
+def xyxy2tlwh(img_shape, xyxy):
+    x_min, y_min, x_max, y_max = xyxy
+
+    x_min = int(x_min * img_shape[1])
+    y_min = int(y_min * img_shape[0])
+    x_max = int(x_max * img_shape[1])
+    y_max = int(y_max * img_shape[0])
+
+    w = x_max - x_min
+    h = y_max - y_min
+
+    return [x_min, y_min, w, h]
 
 @smart_inference_mode()
 def run(
@@ -77,7 +90,7 @@ def run(
     max_det=1000,  # maximum detections per image
     device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
     view_img=False,  # show results
-    save_txt=False,  # save results to *.txt
+    save_txt=True,  # save results to *.txt
     save_format=0,  # save boxes coordinates in YOLO format or Pascal-VOC format (0 for YOLO and 1 for Pascal-VOC)
     save_csv=False,  # save results in CSV format
     save_conf=False,  # save confidences in --save-txt labels
@@ -158,8 +171,9 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = increment_path(Path(project) / name, exist_ok=exist_ok)  # increment run
-    (save_dir / "labels" if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
+    save_dir = f"{project}/inference_results/{name}"
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir, exist_ok=True)
 
     # Load model
     device = select_device(device)
@@ -213,7 +227,7 @@ def run(
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
 
         # Define the path for the CSV file
-        csv_path = save_dir / "predictions.csv"
+        csv_path = f"{save_dir}/predictions.csv"
 
         # Create or append to the CSV file
         def write_to_csv(image_name, prediction, confidence):
@@ -235,8 +249,15 @@ def run(
                 p, im0, frame = path, im0s.copy(), getattr(dataset, "frame", 0)
 
             p = Path(p)  # to Path
-            save_path = str(save_dir / p.name)  # im.jpg
-            txt_path = str(save_dir / "labels" / p.stem) + ("" if dataset.mode == "image" else f"_{frame}")  # im.txt
+            save_path = f"{save_dir}/{p.name}"  # im.jpg
+            txt_path = str(Path(save_dir) / p.stem) + ("" if dataset.mode == "image" else f"_{frame}")  # im.txt
+            data_yaml_path = str(Path(project).parent / "dataset" / "train_dataset" / "data.yaml")
+
+            with open(data_yaml_path, "r") as f:
+                data_info = yaml.safe_load(f)
+            
+            class_names = data_info["names"]
+
             s += "{:g}x{:g} ".format(*im.shape[2:])  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
@@ -261,22 +282,35 @@ def run(
                         write_to_csv(p.name, label, confidence_str)
 
                     if save_txt:  # Write to file
+
+                        xyxy_t = torch.tensor(xyxy).view(1, 4)
+
                         if save_format == 0:
-                            coords = (
-                                (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()
-                            )  # normalized xywh
+                            coords_t = xyxy2tlwh(im0.shape, xyxy_t[0])
+                            coords = (torch.tensor(coords_t) / gn).view(-1).tolist()
                         else:
-                            coords = (torch.tensor(xyxy).view(1, 4) / gn).view(-1).tolist()  # xyxy
-                        line = (cls, *coords, conf) if save_conf else (cls, *coords)  # label format
+                            coords_t = xyxy2tlwh(im0.shape, xyxy_t[0])
+                            coords = (torch.tensor(coords_t) / gn).view(-1).tolist()
+
+                        class_name = class_names[int(cls)]
+
+                        if save_conf:
+                            line = (class_name, coords[0], coords[1], coords[2], coords[3], conf)
+                        else:
+                            line = (class_name, coords[0], coords[1], coords[2], coords[3])
+
                         with open(f"{txt_path}.txt", "a") as f:
-                            f.write(("%g " * len(line)).rstrip() % line + "\n")
+                            f.write(
+                                (",".join(["%s"] + ["%g"] * (len(line) - 1)) % line)
+                                + "\n"
+                            )
 
                     if save_img or save_crop or view_img:  # Add bbox to image
                         c = int(cls)  # integer class
                         label = None if hide_labels else (names[c] if hide_conf else f"{names[c]} {conf:.2f}")
                         annotator.box_label(xyxy, label, color=colors(c, True))
                     if save_crop:
-                        save_one_box(xyxy, imc, file=save_dir / "crops" / names[c] / f"{p.stem}.jpg", BGR=True)
+                        save_one_box(xyxy, imc, file=f"{save_dir}/crops/{names[c]}/{p.stem}.jpg", BGR=True)
 
             # Stream results
             im0 = annotator.result()
@@ -314,8 +348,8 @@ def run(
     t = tuple(x.t / seen * 1e3 for x in dt)  # speeds per image
     LOGGER.info(f"Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}" % t)
     if save_txt or save_img:
-        s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ""
-        LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
+        s = f"\n{len(list(Path(save_dir).glob('*.txt')))} labels saved to {save_dir}" if save_txt else ""
+        LOGGER.info(f"Results saved to {colorstr('bold', Path(save_dir))}{s}")
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
@@ -371,7 +405,6 @@ def parse_opt():
     
     parser.add_argument("--max-det", type=int, default=1000, help="maximum detections per image")
     parser.add_argument("--view-img", action="store_true", help="show results")
-    parser.add_argument("--save-txt", action="store_true", help="save results to *.txt")
     parser.add_argument(
         "--save-format",
         type=int,
@@ -398,14 +431,14 @@ def parse_opt():
     parser.add_argument("--vid-stride", type=int, default=1, help="video frame-rate stride")
 
     # Docker arguments
-    parser.add_argument("--project", default=r"D:\models\MOAI_yolo\yolo\subproject\detection\v1", help="save results to project/name") # project + subproject + task + version + inference_result
-    parser.add_argument("--name", default="inference_result", help="save results to project/name") # inference_name
-    parser.add_argument("--weights", nargs="+", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\v1\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
-    parser.add_argument("--source", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
+    parser.add_argument("--project", default=r"D:\moai_test\test_project\sub_project\detection\v1", help="save results to project/name") # project + subproject + task + version + inference_result
+    parser.add_argument("--name", default="test_name", help="save results to project/name") # inference_name
+    parser.add_argument("--weights", nargs="+", type=str, default=r"D:\models\Custom_YOLO\runs\train\[241106]_FE_press\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
+    parser.add_argument("--source", type=str, default=r"D:\moai_test\test_project\sub_project\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
     parser.add_argument("--conf-thres", type=float, default=0.25, help="confidence threshold")
     parser.add_argument("--device", default="0" if torch.cuda.is_available() else "cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
-
+    parser.add_argument("--save-txt", type=bool, default=True, help="save results to *.txt")
 
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
