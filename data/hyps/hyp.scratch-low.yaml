@@ -32,3 +32,10 @@ fliplr: 0.5 # image flip left-right (probability)
 mosaic: 1.0 # image mosaic (probability)
 mixup: 0.0 # image mixup (probability)
 copy_paste: 0.0 # segment copy-paste (probability)
+
+# 학습용 파라미터
+imgsz: 1280
+batch-size: 4
+weights: yolov5m.pt
+epochs: 10
+resume: false

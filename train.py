@@ -167,6 +167,21 @@ def train(hyp, opt, device, callbacks):
     LOGGER.info(colorstr("hyperparameters: ") + ", ".join(f"{k}={v}" for k, v in hyp.items()))
     opt.hyp = hyp.copy()  # for saving hyps to checkpoints
 
+    # imgsz 변경
+    imgsz = hyp['imgsz']
+    # weights 변경
+    weights = os.getcwd() + f"/weights/{hyp['weights']}"
+    # batch-size 변경
+    batch_size = hyp['batch-size']
+    # epochs 변경
+    epochs = hyp['epochs']
+    # patience 변경
+    opt.patience = hyp['patience']
+    # resume 변경
+    resume = hyp['resume']
+    # data 변경
+    data = 
+
     # Save run settings
     if not evolve:
         yaml_save(save_dir / "hyp.yaml", hyp)
@@ -612,16 +627,16 @@ def parse_opt(known=False):
     parser.add_argument("--ndjson-file", action="store_true", help="Log ndjson to file")
 
     # Docker YOLO arguments
-    parser.add_argument("--project", default=r"D:\models\MOAI_yolo\yolo\subproject\detection", help="save to project/name") # project + subproject + task
+    parser.add_argument("--project", default=r"E:\moai_test\project\subproject\task", help="save to project/name") # project + subproject + task
     parser.add_argument("--name", default=r"v1", help="save to project/name") # version
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="train, val image size (pixels)")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
-    parser.add_argument("--weights", type=str, default=r"D:\models\MOAI_yolo\weights\yolov5m.pt", help="initial weights path")
-    parser.add_argument("--epochs", type=int, default=30, help="total training epochs")
-    parser.add_argument("--patience", type=int, default=20, help="EarlyStopping patience (epochs without improvement)")
+    parser.add_argument("--weights", type=str, default=r"E:\Dev\models\MOAI_yolo\weights\yolov5m.pt", help="initial weights path")
+    parser.add_argument("--epochs", type=int, default=10, help="total training epochs")
+    parser.add_argument("--patience", type=int, default=10, help="EarlyStopping patience (epochs without improvement)")
     parser.add_argument("--resume", action="store_true", help="resume most recent training")
-    parser.add_argument("--data", type=str, default=r"D:\models\MOAI_yolo\yolo\subproject\detection\dataset\train_dataset\data.yaml", help="dataset.yaml path")
-    parser.add_argument("--hyp", type=str, default="/MOAI_yolo/data/hyps/hyp.scratch-low.yaml", help="hyperparameters path")
+    parser.add_argument("--data", type=str, default=r"E:\moai_test\project\subproject\task\dataset\train_dataset\data.yaml", help="dataset.yaml path")
+    parser.add_argument("--hyp", type=str, default=r"E:\Dev\models\MOAI_yolo\data\hyps\hyp.scratch-low.yaml", help="hyperparameters path")
 
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
