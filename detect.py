@@ -183,7 +183,7 @@ def run(
     device = select_device(device)
 
     # weights 경로 변경
-    weights = f"/moai_test/{project}/{subproject}/{task}/{version}/train_results/best.pt"
+    weights = f"/moai_test/{project}/{subproject}/{task}/{version}/training_results/best.pt"
 
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
