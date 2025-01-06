@@ -165,7 +165,7 @@ def run(
         run(source='data/videos/example.mp4', weights='yolov5s.pt', conf_thres=0.4, device='0')
         ```
     """
-    source = f"/moai_test/{project}/{subproject}/{task}/dataset/inference_dataset"
+    source = f"/moai/{project}/{subproject}/{task}/dataset/inference_dataset"
     save_img = not nosave and not source.endswith(".txt")  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(("rtsp://", "rtmp://", "http://", "https://"))
@@ -175,7 +175,7 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = f"/moai_test/{project}/{subproject}/{task}/{version}/inference_results/{name}"
+    save_dir = f"/moai/{project}/{subproject}/{task}/{version}/inference_results/{name}"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
 
@@ -183,7 +183,7 @@ def run(
     device = select_device(device)
 
     # weights 경로 변경
-    weights = f"/moai_test/{project}/{subproject}/{task}/{version}/training_results/best.pt"
+    weights = f"/moai/{project}/{subproject}/{task}/{version}/weights/best.pt"
 
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
@@ -259,7 +259,7 @@ def run(
             p = Path(p)  # to Path
             save_path = f"{save_dir}/{p.name}"  # im.jpg
             txt_path = str(Path(save_dir) / p.stem) + ("" if dataset.mode == "image" else f"_{frame}")  # im.txt
-            data_yaml_path = f"/moai_test/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
+            data_yaml_path = f"/moai/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
 
             with open(data_yaml_path, "r") as f:
                 data_info = yaml.safe_load(f)
