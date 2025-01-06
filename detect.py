@@ -101,11 +101,6 @@ def run(
     augment=False,  # augmented inference
     visualize=False,  # visualize features
     update=False,  # update all models
-    project=ROOT / "runs/detect",  # save results to project/name
-    subproject="sub_project",  # save results to project/name
-    task="detection",  # save results to project/name
-    version="v1",  # save results to project/name
-    name="exp",  # save results to project/name
     exist_ok=False,  # existing project/name ok, do not increment
     line_thickness=3,  # bounding box thickness (pixels)
     hide_labels=False,  # hide labels
@@ -113,6 +108,12 @@ def run(
     half=False,  # use FP16 half-precision inference
     dnn=False,  # use OpenCV DNN for ONNX inference
     vid_stride=1,  # video frame-rate stride
+
+    project=ROOT / "runs/detect",  # save results to project/name
+    subproject="sub_project",  # save results to project/name
+    task="detection",  # save results to project/name
+    version="v1",  # save results to project/name
+    name="exp",  # save results to project/name
 ):
     """
     Runs YOLOv5 detection inference on various sources like images, videos, directories, streams, etc.
@@ -164,7 +165,7 @@ def run(
         run(source='data/videos/example.mp4', weights='yolov5s.pt', conf_thres=0.4, device='0')
         ```
     """
-    source = f"d:/moai_test/{project}/{subproject}/{task}/dataset/inference_dataset"
+    source = f"/moai_test/{project}/{subproject}/{task}/dataset/inference_dataset"
     save_img = not nosave and not source.endswith(".txt")  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(("rtsp://", "rtmp://", "http://", "https://"))
@@ -174,12 +175,16 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = f"d:/moai_test/{project}/{subproject}/{task}/{version}/inference_results/{name}"
+    save_dir = f"/moai_test/{project}/{subproject}/{task}/{version}/inference_results/{name}"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
 
     # Load model
     device = select_device(device)
+
+    # weights 경로 변경
+    weights = f"/moai_test/{project}/{subproject}/{task}/{version}/train_results/best.pt"
+
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
@@ -254,7 +259,7 @@ def run(
             p = Path(p)  # to Path
             save_path = f"{save_dir}/{p.name}"  # im.jpg
             txt_path = str(Path(save_dir) / p.stem) + ("" if dataset.mode == "image" else f"_{frame}")  # im.txt
-            data_yaml_path = f"d:/moai_test/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
+            data_yaml_path = f"/moai_test/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
 
             with open(data_yaml_path, "r") as f:
                 data_info = yaml.safe_load(f)
