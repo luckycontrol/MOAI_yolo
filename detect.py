@@ -102,6 +102,9 @@ def run(
     visualize=False,  # visualize features
     update=False,  # update all models
     project=ROOT / "runs/detect",  # save results to project/name
+    subproject="sub_project",  # save results to project/name
+    task="detection",  # save results to project/name
+    version="v1",  # save results to project/name
     name="exp",  # save results to project/name
     exist_ok=False,  # existing project/name ok, do not increment
     line_thickness=3,  # bounding box thickness (pixels)
@@ -161,7 +164,7 @@ def run(
         run(source='data/videos/example.mp4', weights='yolov5s.pt', conf_thres=0.4, device='0')
         ```
     """
-    source = str(source)
+    source = f"d:/moai_test/{project}/{subproject}/{task}/dataset/inference_dataset"
     save_img = not nosave and not source.endswith(".txt")  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(("rtsp://", "rtmp://", "http://", "https://"))
@@ -171,7 +174,7 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = f"{project}/inference_results/{name}"
+    save_dir = f"d:/moai_test/{project}/{subproject}/{task}/{version}/inference_results/{name}"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
 
@@ -251,7 +254,7 @@ def run(
             p = Path(p)  # to Path
             save_path = f"{save_dir}/{p.name}"  # im.jpg
             txt_path = str(Path(save_dir) / p.stem) + ("" if dataset.mode == "image" else f"_{frame}")  # im.txt
-            data_yaml_path = str(Path(project).parent / "dataset" / "train_dataset" / "data.yaml")
+            data_yaml_path = f"d:/moai_test/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
 
             with open(data_yaml_path, "r") as f:
                 data_info = yaml.safe_load(f)
@@ -430,15 +433,18 @@ def parse_opt():
     parser.add_argument("--vid-stride", type=int, default=1, help="video frame-rate stride")
 
     # Docker arguments
-    parser.add_argument("--project", default=r"D:\moai_test\test_project\sub_project\detection\v1", help="save results to project/name") # project + subproject + task + version + inference_result
+    parser.add_argument("--project", default=r"test_project", help="save results to project/name") # project + subproject + task + version + inference_result
+    parser.add_argument("--subproject", default=r"sub_project", help="save results to project/name")
+    parser.add_argument("--task", default=r"detection", help="save results to project/name")
+    parser.add_argument("--version", default=r"v1", help="save results to project/name")
     parser.add_argument("--name", default="test_name", help="save results to project/name") # inference_name
     parser.add_argument("--weights", nargs="+", type=str, default=r"D:\models\Custom_YOLO\runs\train\[241106]_FE_press\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
     parser.add_argument("--source", type=str, default=r"D:\moai_test\test_project\sub_project\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
-    parser.add_argument("--conf-thres", type=float, default=0.7, help="confidence threshold")
+    parser.add_argument("--conf-thres", type=float, default=0.1, help="confidence threshold") # 0.1 고정
     parser.add_argument("--device", default="0" if torch.cuda.is_available() else "cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
-    parser.add_argument("--save-txt", action="store_true", help="save results to *.txt")
-    parser.add_argument("--save-conf", action="store_true", help="save confidences in --save-txt labels")
+    parser.add_argument("--save-txt", type=bool, default=True, help="save results to *.txt") # True 고정
+    parser.add_argument("--save-conf", type=bool, default=True, help="save confidences in --save-txt labels") # True 고정
 
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
