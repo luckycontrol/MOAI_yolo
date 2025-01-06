@@ -169,8 +169,6 @@ def train(hyp, opt, device, callbacks):
 
     # imgsz 변경
     imgsz = hyp['imgsz']
-    # weights 변경
-    weights = os.getcwd() + f"/weights/{hyp['weights']}"
     # batch-size 변경
     batch_size = hyp['batch-size']
     # epochs 변경
@@ -179,8 +177,6 @@ def train(hyp, opt, device, callbacks):
     opt.patience = hyp['patience']
     # resume 변경
     resume = hyp['resume']
-    # data 변경
-    data = 
 
     # Save run settings
     if not evolve:
@@ -677,6 +673,13 @@ def main(opt, callbacks=Callbacks()):
         if is_url(opt_data):
             opt.data = check_file(opt_data)  # avoid HUB resume auth timeout
     else:
+        # data 경로 수정
+        opt.data = f"/moai/{opt.project}/{opt.subproject}/{opt.task}/dataset/train_dataset/data.yaml"
+        # hyp 경로 수정
+        opt.hyp = f"/moai/{opt.project}/{opt.subproject}/{opt.task}/dataset/train_dataset/hyp.yaml"
+        # weights 경로 수정
+        opt.weights = os.getcwd() + f"/weights/{hyp['weights']}"
+
         opt.data, opt.cfg, opt.hyp, opt.weights, opt.project = (
             check_file(opt.data),
             check_yaml(opt.cfg),

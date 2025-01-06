@@ -36,6 +36,6 @@ copy_paste: 0.0 # segment copy-paste (probability)
 # 학습용 파라미터
 imgsz: 1280
 batch-size: 4
-weights: yolov5m.pt
+weights: m # m6
 epochs: 10
 resume: false
