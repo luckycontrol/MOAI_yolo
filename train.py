@@ -99,7 +99,7 @@ RANK = int(os.getenv("RANK", -1))
 WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
 GIT_INFO = check_git_info()
 
-VOLUME_PATH = "d:/moai_test"
+VOLUME_PATH = "/moai"
 
 def train(hyp, opt, device, callbacks):
     """
