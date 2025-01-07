@@ -99,6 +99,7 @@ RANK = int(os.getenv("RANK", -1))
 WORLD_SIZE = int(os.getenv("WORLD_SIZE", 1))
 GIT_INFO = check_git_info()
 
+VOLUME_PATH = "d:/moai_test"
 
 def train(hyp, opt, device, callbacks):
     """
@@ -167,16 +168,19 @@ def train(hyp, opt, device, callbacks):
     LOGGER.info(colorstr("hyperparameters: ") + ", ".join(f"{k}={v}" for k, v in hyp.items()))
     opt.hyp = hyp.copy()  # for saving hyps to checkpoints
 
-    # imgsz 변경
+    # ============ imgsz 변경 ============
     imgsz = hyp['imgsz']
-    # batch-size 변경
-    batch_size = hyp['batch-size']
-    # epochs 변경
+    # ============ batch-size 변경 ============
+    batch_size = hyp['batch_size']
+    # ============ epochs 변경 ============
     epochs = hyp['epochs']
-    # patience 변경
-    opt.patience = hyp['patience']
-    # resume 변경
+    # ============ patience 변경 ============
+    opt.patience = hyp['epochs']
+    # ============ resume 변경 ============
     resume = hyp['resume']
+    # =========== weights 변경 ============
+    model_type = hyp['weights']
+    weights = f"{os.path.join(os.getcwd(), 'weights', f'yolov5{model_type}.pt')}"
 
     # Save run settings
     if not evolve:
@@ -424,7 +428,7 @@ def train(hyp, opt, device, callbacks):
                     imgs = nn.functional.interpolate(imgs, size=ns, mode="bilinear", align_corners=False)
 
             # Forward
-            with torch.cuda.amp.autocast(amp):
+            with torch.amp.autocast(device_type=device.type, enabled=amp):
                 pred = model(imgs)  # forward
                 loss, loss_items = compute_loss(pred, targets.to(device))  # loss scaled by batch_size
                 if RANK != -1:
@@ -623,11 +627,13 @@ def parse_opt(known=False):
     parser.add_argument("--ndjson-file", action="store_true", help="Log ndjson to file")
 
     # Docker YOLO arguments
-    parser.add_argument("--project", default=r"E:\moai_test\project\subproject\task", help="save to project/name") # project + subproject + task
-    parser.add_argument("--name", default=r"v1", help="save to project/name") # version
+    parser.add_argument("--project", default="test_project", help="save to project/name")
+    parser.add_argument("--subproject", default="sub_project", help="save to project/name")
+    parser.add_argument("--task", default="detection", help="save to project/name")
+    parser.add_argument("--name", default="v2", help="save to project/name") # version
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="train, val image size (pixels)")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
-    parser.add_argument("--weights", type=str, default=r"E:\Dev\models\MOAI_yolo\weights\yolov5m.pt", help="initial weights path")
+    parser.add_argument("--weights", type=str, default=f"{os.getcwd()}/weights/yolov5m.pt", help="initial weights path")
     parser.add_argument("--epochs", type=int, default=10, help="total training epochs")
     parser.add_argument("--patience", type=int, default=10, help="EarlyStopping patience (epochs without improvement)")
     parser.add_argument("--resume", action="store_true", help="resume most recent training")
@@ -673,12 +679,10 @@ def main(opt, callbacks=Callbacks()):
         if is_url(opt_data):
             opt.data = check_file(opt_data)  # avoid HUB resume auth timeout
     else:
-        # data 경로 수정
-        opt.data = f"/moai/{opt.project}/{opt.subproject}/{opt.task}/dataset/train_dataset/data.yaml"
-        # hyp 경로 수정
-        opt.hyp = f"/moai/{opt.project}/{opt.subproject}/{opt.task}/dataset/train_dataset/hyp.yaml"
-        # weights 경로 수정
-        opt.weights = os.getcwd() + f"/weights/{hyp['weights']}"
+        # =================== data 파일 경로 수정 ====================
+        opt.data = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/dataset/train_dataset/data.yaml"
+        # =================== hyp 파일 경로 수정 =====================
+        opt.hyp = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/dataset/train_dataset/hyp.yaml"
 
         opt.data, opt.cfg, opt.hyp, opt.weights, opt.project = (
             check_file(opt.data),
@@ -694,8 +698,11 @@ def main(opt, callbacks=Callbacks()):
             opt.exist_ok, opt.resume = opt.resume, False  # pass resume to exist_ok and disable resume
         if opt.name == "cfg":
             opt.name = Path(opt.cfg).stem  # use model.yaml as name
-        opt.save_dir = f"{opt.project}/{opt.name}/training_results"  # save dir
-        opt.save_weight_dir = f"{opt.project}/{opt.name}/weights"
+
+        # ================ 결과 파일 저장 경로 ====================
+        opt.save_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.name}/training_results"  # save dir
+        # ================ weight 파일 저장 경로 ==================
+        opt.save_weight_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.name}/weights"
 
     # DDP mode
     device = select_device(opt.device, batch_size=opt.batch_size)
