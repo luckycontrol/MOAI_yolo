@@ -630,7 +630,7 @@ def parse_opt(known=False):
     parser.add_argument("--project", default="test_project", help="save to project/name")
     parser.add_argument("--subproject", default="sub_project", help="save to project/name")
     parser.add_argument("--task", default="detection", help="save to project/name")
-    parser.add_argument("--name", default="v2", help="save to project/name") # version
+    parser.add_argument("--version", default="v2", help="save to project/name") # version
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="train, val image size (pixels)")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
     parser.add_argument("--weights", type=str, default=f"{os.getcwd()}/weights/yolov5m.pt", help="initial weights path")
@@ -696,13 +696,13 @@ def main(opt, callbacks=Callbacks()):
             if opt.project == str(ROOT / "runs/train"):  # if default project name, rename to runs/evolve
                 opt.project = str(ROOT / "runs/evolve")
             opt.exist_ok, opt.resume = opt.resume, False  # pass resume to exist_ok and disable resume
-        if opt.name == "cfg":
-            opt.name = Path(opt.cfg).stem  # use model.yaml as name
+        if opt.version == "cfg":
+            opt.version = Path(opt.cfg).stem  # use model.yaml as name
 
         # ================ 결과 파일 저장 경로 ====================
-        opt.save_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.name}/training_results"  # save dir
+        opt.save_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/training_results"  # save dir
         # ================ weight 파일 저장 경로 ==================
-        opt.save_weight_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.name}/weights"
+        opt.save_weight_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights"
 
     # DDP mode
     device = select_device(opt.device, batch_size=opt.batch_size)
