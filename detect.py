@@ -187,10 +187,10 @@ def run(
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
 
-    hyp_yaml_path = f"/moai/{project}/{subproject}/{task}/{version}/training_result/hyp.yaml"
-    with open(hyp_yaml_path, 'r') as f:
-        hyp = yaml.safe_load(f)
-    imgsz = hyp['imgsz']
+    opt_yaml_path = f"/moai/{project}/{subproject}/{task}/{version}/training_result/opt.yaml"
+    with open(opt_yaml_path, 'r') as f:
+        opt = yaml.safe_load(f)
+    imgsz = opt['imgsz']
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
     # Dataloader
