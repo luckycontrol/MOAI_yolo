@@ -190,7 +190,7 @@ def run(
     opt_yaml_path = f"/moai/{project}/{subproject}/{task}/{version}/training_result/opt.yaml"
     with open(opt_yaml_path, 'r') as f:
         opt = yaml.safe_load(f)
-    imgsz = opt['imgsz']
+    imgsz = (opt['imgsz'], opt['imgsz'])
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
     # Dataloader
