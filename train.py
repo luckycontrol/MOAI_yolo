@@ -666,8 +666,8 @@ def main(opt, callbacks=Callbacks()):
 
     # Resume (from specified or most recent last.pt)
     if opt.resume and not check_comet_resume(opt) and not opt.evolve:
-        last = Path(check_file(opt.resume) if isinstance(opt.resume, str) else get_latest_run())
-        opt_yaml = last.parent.parent / "opt.yaml"  # train options yaml
+        last = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/last.pt"
+        opt_yaml =f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/training_result/opt.yaml"  # train options yaml
         opt_data = opt.data  # original dataset
         if opt_yaml.is_file():
             with open(opt_yaml, errors="ignore") as f:
@@ -700,7 +700,7 @@ def main(opt, callbacks=Callbacks()):
             opt.version = Path(opt.cfg).stem  # use model.yaml as name
 
         # ================ 결과 파일 저장 경로 ====================
-        opt.save_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/training_results"  # save dir
+        opt.save_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/training_result"  # save dir
         # ================ weight 파일 저장 경로 ==================
         opt.save_weight_dir = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights"
 
