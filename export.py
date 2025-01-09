@@ -1527,7 +1527,7 @@ def parse_opt(known=False):
     parser.add_argument(
         "--include",
         nargs="+",
-        default=["torchscript"],
+        default=["onnx"],
         help="torchscript, onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs, paddle",
     )
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
