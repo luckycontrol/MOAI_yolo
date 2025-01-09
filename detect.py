@@ -85,7 +85,7 @@ def run(
     source=ROOT / "data/images",  # file/dir/URL/glob/screen/0(webcam)
     data=ROOT / "data/coco128.yaml",  # dataset.yaml path
     imgsz=(640, 640),  # inference size (height, width)
-    conf_thres=0.25,  # confidence threshold
+    conf_thres=0.1,  # confidence threshold
     iou_thres=0.45,  # NMS IOU threshold
     max_det=1000,  # maximum detections per image
     device="",  # cuda device, i.e. 0 or 0,1,2,3 or cpu
@@ -95,7 +95,7 @@ def run(
     save_csv=False,  # save results in CSV format
     save_conf=False,  # save confidences in --save-txt labels
     save_crop=False,  # save cropped prediction boxes
-    nosave=False,  # do not save images/videos
+    nosave=True,  # do not save images/videos
     classes=None,  # filter by class: --class 0, or --class 0 2 3
     agnostic_nms=False,  # class-agnostic NMS
     augment=False,  # augmented inference
@@ -113,7 +113,6 @@ def run(
     subproject="sub_project",  # save results to project/name
     task="detection",  # save results to project/name
     version="v1",  # save results to project/name
-    name="exp",  # save results to project/name
 ):
     """
     Runs YOLOv5 detection inference on various sources like images, videos, directories, streams, etc.
@@ -165,7 +164,7 @@ def run(
         run(source='data/videos/example.mp4', weights='yolov5s.pt', conf_thres=0.4, device='0')
         ```
     """
-    source = f"/moai/{project}/{subproject}/{task}/dataset/inference_dataset"
+    source = f"/moai/{project}/{subproject}/{task}/{version}/inference_dataset"
     save_img = not nosave and not source.endswith(".txt")  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(("rtsp://", "rtmp://", "http://", "https://"))
@@ -175,7 +174,7 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = f"/moai/{project}/{subproject}/{task}/{version}/inference_results/{name}"
+    save_dir = f"/moai/{project}/{subproject}/{task}/{version}/inference_result"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
 
@@ -187,6 +186,11 @@ def run(
 
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
+
+    hyp_yaml_path = f"/moai/{project}/{subproject}/{task}/{version}/training_result/hyp.yaml"
+    with open(hyp_yaml_path, 'r') as f:
+        hyp = yaml.safe_load(f)
+    imgsz = hyp['imgsz']
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
     # Dataloader
@@ -442,7 +446,6 @@ def parse_opt():
     parser.add_argument("--subproject", default=r"sub_project", help="save results to project/name")
     parser.add_argument("--task", default=r"detection", help="save results to project/name")
     parser.add_argument("--version", default=r"v1", help="save results to project/name")
-    parser.add_argument("--name", default="test_name", help="save results to project/name") # inference_name
     parser.add_argument("--weights", nargs="+", type=str, default=r"D:\models\Custom_YOLO\runs\train\[241106]_FE_press\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
     parser.add_argument("--source", type=str, default=r"D:\moai_test\test_project\sub_project\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
