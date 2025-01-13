@@ -1,4 +1,4 @@
-# Ultralytics YOLOv5 🚀, AGPL-3.0 license
+# Ultralytics YOLOv5 , AGPL-3.0 license
 """
 Run YOLOv5 detection inference on images, videos, directories, globs, YouTube, webcam, streams, etc.
 
@@ -263,6 +263,12 @@ def run(
             p = Path(p)  # to Path
             save_path = f"{save_dir}/{p.name}"  # im.jpg
             txt_path = str(Path(save_dir) / p.stem) + ("" if dataset.mode == "image" else f"_{frame}")  # im.txt
+            
+            # Create empty txt file even if no detections
+            if save_txt:
+                with open(f"{txt_path}.txt", "w") as f:
+                    pass
+
             data_yaml_path = f"/moai/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
 
             with open(data_yaml_path, "r") as f:
