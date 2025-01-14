@@ -1541,11 +1541,11 @@ def main(opt):
     for opt.weights in opt.weights if isinstance(opt.weights, list) else [opt.weights]:
         run(**vars(opt))
 
+    end_file_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/export_end.txt"
+    # end_file_path 에 파일 생성. 내용은 작성하지 않음
+    open(end_file_path, 'w').close()
+
 
 if __name__ == "__main__":
     opt = parse_opt()
     main(opt)
-    
-    end_file_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/export_end.txt"
-    # end_file_path 에 파일 생성. 내용은 작성하지 않음
-    open(end_file_path, 'w').close()
