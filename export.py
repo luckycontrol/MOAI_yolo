@@ -1570,7 +1570,8 @@ def main(opt):
 
     end_file_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/export_end.txt"
     # end_file_path에 파일 생성. 내용은 작성하지 않음
-    open(end_file_path, 'w').close()
+    with open(end_file_path, "w") as f:
+        pass
 
 
 if __name__ == "__main__":
