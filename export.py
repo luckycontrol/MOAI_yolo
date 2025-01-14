@@ -89,6 +89,7 @@ from utils.torch_utils import select_device, smart_inference_mode
 
 MACOS = platform.system() == "Darwin"  # macOS environment
 
+VOLUME_PATH = "/moai"
 
 class iOSModel(torch.nn.Module):
     """An iOS-compatible wrapper for YOLOv5 models that normalizes input images based on their dimensions."""
@@ -1544,3 +1545,7 @@ def main(opt):
 if __name__ == "__main__":
     opt = parse_opt()
     main(opt)
+    
+    end_file_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/export_end.txt"
+    # end_file_path 에 파일 생성. 내용은 작성하지 않음
+    open(end_file_path, 'w').close()
