@@ -105,6 +105,7 @@ class Loggers:
             "x/lr0",
             "x/lr1",
             "x/lr2",
+            "time",
         ]  # params
         self.best_keys = ["best/epoch", "best/precision", "best/recall", "best/mAP_0.5", "best/mAP_0.5:0.95"]
         for k in LOGGERS:
@@ -259,15 +260,31 @@ class Loggers:
         if self.csv:
             file = self.save_dir / "results.csv"
             n = len(x) + 1  # number of cols
-            s = "" if file.exists() else (("%20s," * n % tuple(["epoch"] + self.keys)).rstrip(",") + "\n")  # add header
-            print(f"epoch: {epoch}")
+            s = ""
+            if not file.exists():
+                header = (("%20s," * n) % tuple(["epoch"] + list(x.keys()))).rstrip(",") + "\n"
+                s += header
 
             for attempt in range(5):
                 try:
                     # CRITICAL SECTION
                     with file_lock:
                         with open(file, "a") as f:
-                            f.write(s + ("%20.5g," * n % tuple([epoch] + vals)).rstrip(",") + "\n")
+
+                            if s:
+                                f.write(s)
+
+                            csv_values = []
+                            for val_key, val in x.items():
+                                if isinstance(val, (float, int)):
+                                    csv_values.append(f"{val:20.5g}")
+                                else:
+                                    csv_values.append(f"{val}")
+
+                            epoch_str = f"{epoch:20.5g}"
+                            line = epoch_str + "," + ",".join(csv_values) + "\n"
+
+                            f.write(line)
                     break
                 except Exception as e:
                     LOGGER.warning(f"WARNING ⚠️ CSV logging failure {e}")
@@ -284,6 +301,9 @@ class Loggers:
 
         if self.tb:
             for k, v in x.items():
+                if k == "time":
+                    continue
+
                 self.tb.add_scalar(k, v, epoch)
         elif self.clearml:  # log to ClearML if TensorBoard not used
             self.clearml.log_scalars(x, epoch)

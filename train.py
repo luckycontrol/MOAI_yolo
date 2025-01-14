@@ -153,6 +153,8 @@ def train(hyp, opt, device, callbacks):
     )
     callbacks.run("on_pretrain_routine_start")
 
+    start_train_time = time.time()
+
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
@@ -493,6 +495,16 @@ def train(hyp, opt, device, callbacks):
             if fi > best_fitness:
                 best_fitness = fi
             log_vals = list(mloss) + list(results) + lr
+
+            time_now = time.time()
+            elapsed = time_now - start_train_time
+            epochs_done = (epoch - start_epoch + 1)
+            avg_epoch_time = elapsed / epochs_done if epochs_done > 0 else 0
+            epochs_left = (epochs - 1) - epoch
+            eta_sec = avg_epoch_time * epochs_left
+            time_left_str = str(timedelta(seconds=int(eta_sec)))
+            log_vals += [time_left_str]
+
             callbacks.run("on_fit_epoch_end", log_vals, epoch, best_fitness, fi)
 
             # Save model
@@ -599,7 +611,7 @@ def parse_opt(known=False):
     parser.add_argument("--bucket", type=str, default="", help="gsutil bucket")
     parser.add_argument("--cache", type=str, nargs="?", const="ram", help="image --cache ram/disk")
     parser.add_argument("--image-weights", action="store_true", help="use weighted image selection for training")
-    parser.add_argument("--device", default='cuda' if torch.cuda.is_vailable() else 'cpu', help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
+    parser.add_argument("--device", default='0' if torch.cuda.is_available() else 'cpu', help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
     parser.add_argument("--multi-scale", action="store_true", help="vary img-size +/- 50%%")
     parser.add_argument("--single-cls", action="store_true", help="train multi-class data as single-class")
     parser.add_argument("--optimizer", type=str, choices=["SGD", "Adam", "AdamW"], default="AdamW", help="optimizer")
@@ -630,15 +642,15 @@ def parse_opt(known=False):
     parser.add_argument("--project", default="test_project", help="save to project/name")
     parser.add_argument("--subproject", default="sub_project", help="save to project/name")
     parser.add_argument("--task", default="detection", help="save to project/name")
-    parser.add_argument("--version", default="v2", help="save to project/name") # version
+    parser.add_argument("--version", default="v6", help="save to project/name") # version
     parser.add_argument("--imgsz", "--img", "--img-size", type=int, default=640, help="train, val image size (pixels)")
     parser.add_argument("--batch-size", type=int, default=16, help="total batch size for all GPUs, -1 for autobatch")
     parser.add_argument("--weights", type=str, default=f"{os.getcwd()}/weights/yolov5m.pt", help="initial weights path")
     parser.add_argument("--epochs", type=int, default=10, help="total training epochs")
     parser.add_argument("--patience", type=int, default=10, help="EarlyStopping patience (epochs without improvement)")
     parser.add_argument("--resume", action="store_true", help="resume most recent training")
-    parser.add_argument("--data", type=str, default=r"E:\moai_test\project\subproject\task\dataset\train_dataset\data.yaml", help="dataset.yaml path")
-    parser.add_argument("--hyp", type=str, default=r"E:\Dev\models\MOAI_yolo\data\hyps\hyp.scratch-low.yaml", help="hyperparameters path")
+    parser.add_argument("--data", type=str, default=r"D:\moai_test\test_project\sub_project\detection\dataset\train_dataset\data.yaml", help="dataset.yaml path")
+    parser.add_argument("--hyp", type=str, default=r"", help="hyperparameters path")
 
     return parser.parse_known_args()[0] if known else parser.parse_args()
 
