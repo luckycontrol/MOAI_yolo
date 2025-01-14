@@ -83,6 +83,11 @@ def xyxy2tlwh(img_shape, xyxy):
 
 @smart_inference_mode()
 def run(
+    project,
+    subproject,  # save results to project/name
+    task,  # save results to project/name
+    version,  # save results to project/name
+
     weights=ROOT / "yolov5s.pt",  # model path or triton URL
     source=ROOT / "data/images",  # file/dir/URL/glob/screen/0(webcam)
     data=ROOT / "data/coco128.yaml",  # dataset.yaml path
@@ -110,11 +115,6 @@ def run(
     half=False,  # use FP16 half-precision inference
     dnn=False,  # use OpenCV DNN for ONNX inference
     vid_stride=1,  # video frame-rate stride
-
-    project=ROOT / "runs/detect",  # save results to project/name
-    subproject="sub_project",  # save results to project/name
-    task="detection",  # save results to project/name
-    version="v1",  # save results to project/name
 ):
     """
     Runs YOLOv5 detection inference on various sources like images, videos, directories, streams, etc.
@@ -453,9 +453,9 @@ def parse_opt():
     parser.add_argument("--project", default=r"test_project", help="save results to project/name") # project + subproject + task + version + inference_result
     parser.add_argument("--subproject", default=r"sub_project", help="save results to project/name")
     parser.add_argument("--task", default=r"detection", help="save results to project/name")
-    parser.add_argument("--version", default=r"v1", help="save results to project/name")
-    parser.add_argument("--weights", nargs="+", type=str, default=r"D:\moai_test\test_project\sub_project\detection\v1\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
-    parser.add_argument("--source", type=str, default=r"D:\moai_test\test_project\sub_project\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
+    parser.add_argument("--version", default=r"", help="save results to project/name")
+    parser.add_argument("--weights", nargs="+", type=str, default=r"", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
+    parser.add_argument("--source", type=str, default=r"", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
     parser.add_argument("--conf-thres", type=float, default=0.1, help="confidence threshold") # 0.1 고정
     parser.add_argument("--device", default="0" if torch.cuda.is_available() else "cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
@@ -464,6 +464,10 @@ def parse_opt():
 
     opt = parser.parse_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
+
+    opt.weights = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/best.pt"
+    opt.source = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/inference_dataset"
+
     print_args(vars(opt))
     return opt
 
