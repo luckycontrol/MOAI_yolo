@@ -1560,7 +1560,7 @@ def main(opt):
 
     weights_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/best.pt"
 
-    opt.imgsz = imgsz
+    opt.imgsz = [imgsz, imgsz]
     opt.weights = weights_path
     opt.opset = 16
 
