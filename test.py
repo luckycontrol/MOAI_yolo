@@ -66,6 +66,8 @@ from utils.general import (
 )
 from utils.torch_utils import select_device, smart_inference_mode
 
+VOLUME_PATH = "/moai"
+
 def xyxy2tlwh(img_shape, xyxy):
     x_min, y_min, x_max, y_max = xyxy
 
@@ -164,7 +166,7 @@ def run(
         run(source='data/videos/example.mp4', weights='yolov5s.pt', conf_thres=0.4, device='0')
         ```
     """
-    source = f"/moai/{project}/{subproject}/{task}/{version}/inference_dataset"
+    source = f"{VOLUME_PATH}/{project}/{subproject}/{task}/{version}/inference_dataset"
     save_img = not nosave and not source.endswith(".txt")  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(("rtsp://", "rtmp://", "http://", "https://"))
@@ -174,7 +176,7 @@ def run(
         source = check_file(source)  # download
 
     # Directories
-    save_dir = f"/moai/{project}/{subproject}/{task}/{version}/inference_result"
+    save_dir = f"{VOLUME_PATH}/{project}/{subproject}/{task}/{version}/inference_result"
     if not os.path.exists(save_dir):
         os.makedirs(save_dir, exist_ok=True)
 
@@ -182,12 +184,12 @@ def run(
     device = select_device(device)
 
     # weights 경로 변경
-    weights = f"/moai/{project}/{subproject}/{task}/{version}/weights/best.pt"
+    weights = f"{VOLUME_PATH}/{project}/{subproject}/{task}/{version}/weights/best.pt"
 
     model = DetectMultiBackend(weights, device=device, dnn=dnn, data=data, fp16=half)
     stride, names, pt = model.stride, model.names, model.pt
 
-    opt_yaml_path = f"/moai/{project}/{subproject}/{task}/{version}/training_result/opt.yaml"
+    opt_yaml_path = f"{VOLUME_PATH}/{project}/{subproject}/{task}/{version}/training_result/opt.yaml"
     with open(opt_yaml_path, 'r') as f:
         opt = yaml.safe_load(f)
     imgsz = (opt['imgsz'], opt['imgsz'])
@@ -269,7 +271,7 @@ def run(
                 with open(f"{txt_path}.txt", "w") as f:
                     pass
 
-            data_yaml_path = f"/moai/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
+            data_yaml_path = f"{VOLUME_PATH}/{project}/{subproject}/{task}/dataset/train_dataset/data.yaml"
 
             with open(data_yaml_path, "r") as f:
                 data_info = yaml.safe_load(f)
@@ -452,7 +454,7 @@ def parse_opt():
     parser.add_argument("--subproject", default=r"sub_project", help="save results to project/name")
     parser.add_argument("--task", default=r"detection", help="save results to project/name")
     parser.add_argument("--version", default=r"v1", help="save results to project/name")
-    parser.add_argument("--weights", nargs="+", type=str, default=r"D:\models\Custom_YOLO\runs\train\[241106]_FE_press\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
+    parser.add_argument("--weights", nargs="+", type=str, default=r"D:\moai_test\test_project\sub_project\detection\v1\weights\best.pt", help="model path or triton URL") # /project/subproject/task/version/weights/best.pt
     parser.add_argument("--source", type=str, default=r"D:\moai_test\test_project\sub_project\detection\dataset\inference_dataset", help="file/dir/URL/glob/screen/0(webcam)") # /project/subproject/task/dataset/inference_dataset
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
     parser.add_argument("--conf-thres", type=float, default=0.1, help="confidence threshold") # 0.1 고정
