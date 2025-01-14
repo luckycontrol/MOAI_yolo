@@ -459,7 +459,7 @@ def parse_opt():
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640], help="inference size h,w")
     parser.add_argument("--conf-thres", type=float, default=0.1, help="confidence threshold") # 0.1 고정
     parser.add_argument("--device", default="0" if torch.cuda.is_available() else "cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
-    parser.add_argument("--save-txt", type=bool, default=True, help="save results to *.txt") # True 고정
+    parser.add_argument("--save-txt", type=bool, default=True, help="save results to *.t1xt") # True 고정
     parser.add_argument("--save-conf", type=bool, default=True, help="save confidences in --save-txt labels") # True 고정
 
     opt = parser.parse_args()
