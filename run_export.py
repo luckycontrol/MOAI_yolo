@@ -1549,29 +1549,7 @@ def parse_opt(known=False):
 
 def main(opt):
     """Run(**vars(opt))  # Execute the run function with parsed options."""
-
-    import yaml
-
-    training_result_hyp_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/training_result/hyp.yaml"
-    with open(training_result_hyp_path, "r") as f:
-        hyp = yaml.safe_load(f)
-    
-    imgsz = hyp["imgsz"]
-
-    weights_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/best.pt"
-
-    opt.imgsz = [imgsz, imgsz]
-    opt.weights = weights_path
-    opt.opset = 16
-
-    for opt.weights in opt.weights if isinstance(opt.weights, list) else [opt.weights]:
-        run(**vars(opt))
-
-
-    end_file_path = f"{VOLUME_PATH}/{opt.project}/{opt.subproject}/{opt.task}/{opt.version}/weights/export_end.txt"
-    # end_file_path에 파일 생성. 내용은 작성하지 않음
-    with open(end_file_path, "w") as f:
-        pass
+    run(**vars(opt))
 
 
 if __name__ == "__main__":
