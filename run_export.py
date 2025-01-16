@@ -1276,11 +1276,6 @@ def pipeline_coreml(model, im, file, names, y, mlmodel, prefix=colorstr("CoreML 
 
 @smart_inference_mode()
 def run(
-    project,
-    subproject,
-    task,
-    version,
-
     data=ROOT / "data/coco128.yaml",  # 'dataset.yaml path'
     weights=ROOT / "yolov5s.pt",  # weights path
     imgsz=(640, 640),  # image (height, width)
@@ -1507,7 +1502,7 @@ def parse_opt(known=False):
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", type=str, default=ROOT / "data/coco128.yaml", help="dataset.yaml path")
-    parser.add_argument("--weights", nargs="+", type=str, default=ROOT / "yolov5s.pt", help="model.pt path(s)")
+    parser.add_argument("--weights", type=str, default=ROOT / "yolov5s.pt", help="model.pt path(s)")
     parser.add_argument("--imgsz", "--img", "--img-size", nargs="+", type=int, default=[640, 640], help="image (h, w)")
     parser.add_argument("--batch-size", type=int, default=1, help="batch size")
     parser.add_argument("--device", default="cpu", help="cuda device, i.e. 0 or 0,1,2,3 or cpu")
@@ -1536,11 +1531,6 @@ def parse_opt(known=False):
         default=["onnx"],
         help="torchscript, onnx, openvino, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs, paddle",
     )
-
-    parser.add_argument("--project", type=str, default="test_project" , help="project name")
-    parser.add_argument("--subproject", type=str, default="sub_project", help="subproject name")
-    parser.add_argument("--task", type=str, default="detection", help="task name")
-    parser.add_argument("--version", type=str, default="v1", help="version name")
 
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
     print_args(vars(opt))
