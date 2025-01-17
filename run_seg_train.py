@@ -134,6 +134,8 @@ def train(hyp, opt, device, callbacks):
     )
     # callbacks.run('on_pretrain_routine_start')
 
+    start_train_time = time.time()
+
     # Directories
     w = save_dir / "weights"  # weights dir
     (w.parent if evolve else w).mkdir(parents=True, exist_ok=True)  # make dir
@@ -455,6 +457,17 @@ def train(hyp, opt, device, callbacks):
             if fi > best_fitness:
                 best_fitness = fi
             log_vals = list(mloss) + list(results) + lr
+
+            # 남은 학습시간 계산 추가
+            time_now = time.time()
+            elapsed = time_now - start_train_time
+            epochs_done = (epoch - start_epoch + 1)
+            avg_epoch_time = elapsed / epochs_done if epochs_done > 0 else 0
+            epochs_left = (epochs - 1) - epoch
+            eta_sec = avg_epoch_time * epochs_left
+            time_left_str = str(timedelta(seconds=int(eta_sec)))
+            log_vals += [time_left_str]
+
             # callbacks.run('on_fit_epoch_end', log_vals, epoch, best_fitness, fi)
             # Log val metrics and media
             metrics_dict = dict(zip(KEYS, log_vals))
