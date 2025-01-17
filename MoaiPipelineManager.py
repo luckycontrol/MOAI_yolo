@@ -54,7 +54,7 @@ class Manager:
     # ============= Dataset =============
 
     def get_train_dataset_path(self):
-        train_dataset_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/dataset/train_dataset"
+        train_dataset_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/train_dataset"
         return train_dataset_path
 
     def get_test_dataset_path(self):
