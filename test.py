@@ -10,10 +10,10 @@ from MoaiPipelineManager import Manager
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--project", default="test_project")
-    parser.add_argument("--subproject", default="sub_project")
-    parser.add_argument("--task", default="detection")
-    parser.add_argument("--version", default="v199")
+    parser.add_argument("--project", default="20250115")
+    parser.add_argument("--subproject", default="test_sub")
+    parser.add_argument("--task", default="segment_test")
+    parser.add_argument("--version", default="v1")
 
     args = parser.parse_args()
 
@@ -30,10 +30,13 @@ def main():
 
     source = manager.get_test_dataset_path()
     imgsz = opt["imgsz"]
+    weight_type = opt["hyp"]["weights"]
     weights = manager.get_best_weight_path()
     device = '0' if torch.cuda.is_available() else 'cpu'
 
-    ocmd = f"python run_test.py \
+    execute_file = "run_seg_test.py" if weight_type == "m-seg" else "run_test.py"
+
+    ocmd = f"python {execute_file} \
     --source {source} \
     --data {manager.get_data_yaml_path()} \
     --imgsz {imgsz} \

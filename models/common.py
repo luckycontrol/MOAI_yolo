@@ -778,7 +778,7 @@ class DetectMultiBackend(nn.Module):
         Example: path='path/to/model.onnx' -> type=onnx
         """
         # types = [pt, jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs, paddle]
-        from export import export_formats
+        from run_export import export_formats
         from utils.downloads import is_url
 
         sf = list(export_formats().Suffix)  # export suffixes

@@ -8,10 +8,10 @@ from MoaiPipelineManager import Manager
 def parse_args():
     parser = argparse.ArgumentParser()
     
-    parser.add_argument("--project", default="test_project")
-    parser.add_argument("--subproject", default="sub_project")
-    parser.add_argument("--task", default="detection")
-    parser.add_argument("--version", default="v199")
+    parser.add_argument("--project", default="20250115")
+    parser.add_argument("--subproject", default="test_sub")
+    parser.add_argument("--task", default="segment_test")
+    parser.add_argument("--version", default="v1")
 
     args = parser.parse_args()
 
@@ -36,7 +36,9 @@ def main():
     hyp_path = manager.get_hyp_yaml_path()
     data_path = manager.get_data_yaml_path()
 
-    ocmd = f"python run_train.py \
+    execute_file = "run_seg_train.py" if weight_type == "m-seg" else "run_train.py"
+
+    ocmd = f"python {execute_file} \
     --imgsz {imgsz} \
     --batch {batch_size} \
     --epochs {epochs} \
