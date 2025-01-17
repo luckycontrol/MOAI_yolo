@@ -31,7 +31,7 @@ class Manager:
         return hyp
 
     def get_hyp_yaml_path(self):
-        hyp_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/dataset/train_dataset/hyp.yaml"
+        hyp_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/train_dataset/hyp.yaml"
         return hyp_yaml_path
 
     def get_train_result_hyp_yaml(self):
