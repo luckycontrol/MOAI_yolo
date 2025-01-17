@@ -11,20 +11,20 @@ class Manager:
     # ============= Data =============
 
     def get_data_yaml(self):
-        data_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/dataset/train_dataset/data.yaml"
+        data_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/train_dataset/data.yaml"
         with open(data_yaml_path, "r") as f:
             data = yaml.safe_load(f)
 
         return data
 
     def get_data_yaml_path(self):
-        data_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/dataset/train_dataset/data.yaml"
+        data_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/train_dataset/data.yaml"
         return data_yaml_path
 
     # ============= Hyp =============
 
     def get_hyp_yaml(self):
-        hyp_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/dataset/train_dataset/hyp.yaml"
+        hyp_yaml_path = f"{self.location}/{self.project}/{self.subproject}/{self.task}/train_dataset/hyp.yaml"
         with open(hyp_yaml_path, "r") as f:
             hyp = yaml.safe_load(f)
 
