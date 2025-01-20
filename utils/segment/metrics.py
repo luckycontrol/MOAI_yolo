@@ -210,6 +210,7 @@ KEYS = [
     "x/lr0",
     "x/lr1",
     "x/lr2",
+    "time"  # remaining training time
 ]
 
 BEST_KEYS = [

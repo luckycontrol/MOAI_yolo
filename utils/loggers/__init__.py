@@ -433,12 +433,41 @@ class GenericLogger:
         if self.csv:
             keys, vals = list(metrics.keys()), list(metrics.values())
             n = len(metrics) + 1  # number of cols
-            s = "" if self.csv.exists() else (("%23s," * n % tuple(["epoch"] + keys)).rstrip(",") + "\n")  # header
-            with open(self.csv, "a") as f:
-                f.write(s + ("%23.5g," * n % tuple([epoch] + vals)).rstrip(",") + "\n")
+            s = "" 
+            if not self.csv.exists(): 
+                header = (("%23s," * n % tuple(["epoch"] + keys)).rstrip(",") + "\n")  # header
+                s += header
+
+            for attempt in range(5):
+                try:
+                    # CRITICAL SECTION
+                    with file_lock:
+                        with open(self.csv, "a") as f:
+                            if s:
+                                f.write(s)
+
+                            csv_values = []
+                            for val_key, val in zip(keys, vals):
+                                if isinstance(val, (float, int)):
+                                    csv_values.append(f"{val:23.5g}")
+                                else:
+                                    csv_values.append(f"{val}")
+
+                            epoch_str = f"{epoch:23.5g}"
+                            line = epoch_str + "," + ",".join(csv_values) + "\n"
+
+                            f.write(line)
+                    break
+                
+                except Exception as e:
+                    LOGGER.warning(f"WARNING ⚠️ CSV logging failure {e}")
+                    time.sleep(1.0)
 
         if self.tb:
             for k, v in metrics.items():
+                if k == "time":
+                    continue
+                
                 self.tb.add_scalar(k, v, epoch)
 
         if self.wandb:

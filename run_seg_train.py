@@ -458,20 +458,28 @@ def train(hyp, opt, device, callbacks):
                 best_fitness = fi
             log_vals = list(mloss) + list(results) + lr
 
-            # 남은 학습시간 계산 추가
+            # (추가) 남은 학습 시간 계산
             time_now = time.time()
             elapsed = time_now - start_train_time
             epochs_done = (epoch - start_epoch + 1)
             avg_epoch_time = elapsed / epochs_done if epochs_done > 0 else 0
             epochs_left = (epochs - 1) - epoch
             eta_sec = avg_epoch_time * epochs_left
+
+            # HH:MM:SS 형식으로 변환
             time_left_str = str(timedelta(seconds=int(eta_sec)))
+
+            # log_vals에 추가(선택 사항)
             log_vals += [time_left_str]
 
-            # callbacks.run('on_fit_epoch_end', log_vals, epoch, best_fitness, fi)
-            # Log val metrics and media
+            # CSV에 기록할 dict 생성
             metrics_dict = dict(zip(KEYS, log_vals))
+            metrics_dict['time'] = time_left_str  # 'time' 키에 남은 시간 저장
+
+            # logger 콜백 → results.csv에 기록
             logger.log_metrics(metrics_dict, epoch)
+
+            # callbacks.run('on_fit_epoch_end', log_vals, epoch, best_fitness, fi)
 
             # Save model
             if (not nosave) or (final_epoch and not evolve):  # if save
