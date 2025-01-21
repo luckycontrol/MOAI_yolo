@@ -36,7 +36,7 @@ def main():
     hyp_path = manager.get_hyp_yaml_path()
     data_path = manager.get_data_yaml_path()
 
-    execute_file = "run_seg_train.py" if weight_type == "m-seg" else "run_train.py"
+    execute_file = "run_seg_train.py" if weight_type == "m_seg" else "run_train.py"
 
     ocmd = f"python {execute_file} \
     --imgsz {imgsz} \
