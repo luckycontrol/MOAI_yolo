@@ -448,8 +448,9 @@ class GenericLogger:
                                 f.write(s)
 
                             csv_values = []
+                            append_list = ['epoch', 'metrics/mAP_0.5(M)']
                             for val_key, val in zip(keys, vals):
-                                if isinstance(val, (float, int)):
+                                if isinstance(val, (float, int)) and val_key in append_list:
                                     csv_values.append(f"{val:23.5g}")
                                 else:
                                     csv_values.append(f"{val}")
