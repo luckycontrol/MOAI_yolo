@@ -34,7 +34,7 @@ def main():
     weights = manager.get_best_weight_path()
     device = '0' if torch.cuda.is_available() else 'cpu'
 
-    execute_file = "run_seg_test.py" if weight_type == "m-seg" else "run_test.py"
+    execute_file = "run_seg_test.py" if weight_type == "m_seg" else "run_test.py"
 
     ocmd = f"python {execute_file} \
     --source {source} \

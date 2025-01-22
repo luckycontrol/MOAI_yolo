@@ -190,9 +190,9 @@ def run(
                     ]
 
                 # Print results
-                # for c in det[:, 5].unique():
-                #     n = (det[:, 5] == c).sum()  # detections per class
-                #     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
+                for c in det[:, 5].unique():
+                    n = (det[:, 5] == c).sum()  # detections per class
+                    s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
 
                 # Mask plotting
                 annotator.masks(
