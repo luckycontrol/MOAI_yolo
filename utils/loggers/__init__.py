@@ -275,8 +275,9 @@ class Loggers:
                                 f.write(s)
 
                             csv_values = []
+                            append_list = ['epoch', 'metrics/mAP_0.5(M)']
                             for val_key, val in x.items():
-                                if isinstance(val, (float, int)):
+                                if isinstance(val, (float, int)) and val_key in append_list:
                                     csv_values.append(f"{val:20.5g}")
                                 else:
                                     csv_values.append(f"{val}")
