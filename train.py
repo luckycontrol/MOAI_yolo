@@ -10,7 +10,7 @@ def parse_args():
     
     parser.add_argument("--project", default="20250115")
     parser.add_argument("--subproject", default="test_sub")
-    parser.add_argument("--task", default="segment_test")
+    parser.add_argument("--task", default="test_task")
     parser.add_argument("--version", default="v2")
 
     args = parser.parse_args()

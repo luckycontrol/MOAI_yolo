@@ -256,7 +256,11 @@ class Loggers:
 
     def on_fit_epoch_end(self, vals, epoch, best_fitness, fi):
         """Callback that logs metrics and saves them to CSV or NDJSON at the end of each fit (train+val) epoch."""
-        x = dict(zip(self.keys, vals))
+        # Create dictionary with only desired metrics
+        full_dict = dict(zip(self.keys, vals))
+        desired_metrics = ["metrics/mAP_0.5", "time"]
+        x = {k: full_dict[k] for k in desired_metrics if k in full_dict}
+        
         if self.csv:
             file = self.save_dir / "results.csv"
             n = len(x) + 1  # number of cols
@@ -270,14 +274,12 @@ class Loggers:
                     # CRITICAL SECTION
                     with file_lock:
                         with open(file, "a") as f:
-
                             if s:
                                 f.write(s)
 
                             csv_values = []
-                            append_list = ['epoch', 'metrics/mAP_0.5(M)']
                             for val_key, val in x.items():
-                                if isinstance(val, (float, int)) and val_key in append_list:
+                                if isinstance(val, (float, int)):
                                     csv_values.append(f"{val:20.5g}")
                                 else:
                                     csv_values.append(f"{val}")
@@ -448,9 +450,8 @@ class GenericLogger:
                                 f.write(s)
 
                             csv_values = []
-                            append_list = ['epoch', 'metrics/mAP_0.5(M)']
                             for val_key, val in zip(keys, vals):
-                                if isinstance(val, (float, int)) and val_key in append_list:
+                                if isinstance(val, (float, int)):
                                     csv_values.append(f"{val:23.5g}")
                                 else:
                                     csv_values.append(f"{val}")
