@@ -254,19 +254,19 @@ class Loggers:
         if self.comet_logger:
             self.comet_logger.on_val_end(nt, tp, fp, p, r, f1, ap, ap50, ap_class, confusion_matrix)
 
-    def on_fit_epoch_end(self, vals, epoch, best_fitness, fi):
+    def on_fit_epoch_end(self, vals, epoch, best_fitness, fi, time_left_str):
         """Callback that logs metrics and saves them to CSV or NDJSON at the end of each fit (train+val) epoch."""
         # Create dictionary with only desired metrics
         full_dict = dict(zip(self.keys, vals))
-        desired_metrics = ["metrics/mAP_0.5", "time"]
+        desired_metrics = ["metrics/mAP_0.5"]
         x = {k: full_dict[k] for k in desired_metrics if k in full_dict}
         
         if self.csv:
             file = self.save_dir / "results.csv"
-            n = len(x) + 1  # number of cols
+            n = len(x) + 2  # number of cols
             s = ""
             if not file.exists():
-                header = (("%20s," * n) % tuple(["epoch"] + list(x.keys()))).rstrip(",") + "\n"
+                header = (("%20s," * n) % tuple(["epoch", "time"] + list(x.keys()))).rstrip(",") + "\n"
                 s += header
 
             for attempt in range(5):
@@ -279,13 +279,10 @@ class Loggers:
 
                             csv_values = []
                             for val_key, val in x.items():
-                                if isinstance(val, (float, int)):
-                                    csv_values.append(f"{val:20.5g}")
-                                else:
-                                    csv_values.append(f"{val}")
+                                csv_values.append(f"{val:20.5g}")
 
                             epoch_str = f"{epoch:20.5g}"
-                            line = epoch_str + "," + ",".join(csv_values) + "\n"
+                            line = epoch_str + "," + time_left_str + "," + ",".join(csv_values) + "\n"
 
                             f.write(line)
                     break
@@ -434,11 +431,12 @@ class GenericLogger:
     def log_metrics(self, metrics, epoch):
         """Logs metrics to CSV, TensorBoard, W&B, and ClearML; `metrics` is a dict, `epoch` is an int."""
         if self.csv:
-            keys, vals = list(metrics.keys()), list(metrics.values())
-            n = len(metrics) + 1  # number of cols
-            s = "" 
+            remain_keys = ["metrics/mAP_0.5(B)", "time"]
+            filtered_metrics = {k: v for k, v in metrics.items() if k in remain_keys}
+            
+            s = "" if not self.csv.exists() else None  
             if not self.csv.exists(): 
-                header = (("%23s," * n % tuple(["epoch"] + keys)).rstrip(",") + "\n")  # header
+                header = (("%23s," * 3 % tuple(["epoch", "time", "metrics/mAP_0.5(B)"])).rstrip(",") + "\n")  # header
                 s += header
 
             for attempt in range(5):
@@ -449,15 +447,9 @@ class GenericLogger:
                             if s:
                                 f.write(s)
 
-                            csv_values = []
-                            for val_key, val in zip(keys, vals):
-                                if isinstance(val, (float, int)):
-                                    csv_values.append(f"{val:23.5g}")
-                                else:
-                                    csv_values.append(f"{val}")
-
                             epoch_str = f"{epoch:23.5g}"
-                            line = epoch_str + "," + ",".join(csv_values) + "\n"
+                            mAP_str = f"{filtered_metrics['metrics/mAP_0.5(B)']:23.5g}"
+                            line = epoch_str + "," + filtered_metrics["time"] + "," + mAP_str + "\n"
 
                             f.write(line)
                     break

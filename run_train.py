@@ -485,9 +485,8 @@ def train(hyp, opt, device, callbacks):
             epochs_left = (epochs - 1) - epoch
             eta_sec = avg_epoch_time * epochs_left
             time_left_str = str(timedelta(seconds=int(eta_sec)))
-            log_vals += [time_left_str]
-
-            callbacks.run("on_fit_epoch_end", log_vals, epoch, best_fitness, fi)
+            
+            callbacks.run("on_fit_epoch_end", log_vals, epoch, best_fitness, fi, time_left_str)
 
             # Save model
             if (not nosave) or (final_epoch and not evolve):  # if save

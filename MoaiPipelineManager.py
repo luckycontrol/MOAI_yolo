@@ -1,7 +1,7 @@
 import yaml
 
 class Manager:
-    def __init__(self, project, subproject, task, version, location="/moai"):
+    def __init__(self, project, subproject, task, version, location="d:/MOAI/Project"):
         self.project = project
         self.subproject = subproject
         self.task = task
