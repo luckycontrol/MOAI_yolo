@@ -435,12 +435,12 @@ class GenericLogger:
     def log_metrics(self, metrics, epoch):
         """Logs metrics to CSV, TensorBoard, W&B, and ClearML; `metrics` is a dict, `epoch` is an int."""
         if self.csv:
-            remain_keys = ["metrics/mAP_0.5(B)", "time"]
+            remain_keys = ["metrics/mAP_0.5(B)", "time", "metrics/precision(B)", "metrics/recall(B)"]
             filtered_metrics = {k: v for k, v in metrics.items() if k in remain_keys}
             
             s = "" if not self.csv.exists() else None  
             if not self.csv.exists(): 
-                header = (("%23s," * 3 % tuple(["epoch", "time", "metrics/mAP_0.5(B)"])).rstrip(",") + "\n")  # header
+                header = (("%23s," * 5 % tuple(["epoch", "time", "metrics/mAP_0.5", "metrics/precision", "metrics/recall"])).rstrip(",") + "\n")  # header
                 s += header
 
             for attempt in range(5):
@@ -453,7 +453,10 @@ class GenericLogger:
 
                             epoch_str = f"{epoch:23.5g}"
                             mAP_str = f"{filtered_metrics['metrics/mAP_0.5(B)']:23.5g}"
-                            line = epoch_str + "," + filtered_metrics["time"] + "," + mAP_str + "\n"
+                            precision_str = f"{filtered_metrics['metrics/precision(B)']:23.5g}"
+                            recall_str = f"{filtered_metrics['metrics/recall(B)']:23.5g}"
+
+                            line = epoch_str + "," + filtered_metrics["time"] + "," + mAP_str + "," + precision_str + "," + recall_str + "\n"
 
                             f.write(line)
                     break
