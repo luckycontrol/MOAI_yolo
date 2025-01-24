@@ -258,15 +258,15 @@ class Loggers:
         """Callback that logs metrics and saves them to CSV or NDJSON at the end of each fit (train+val) epoch."""
         # Create dictionary with only desired metrics
         full_dict = dict(zip(self.keys, vals))
-        desired_metrics = ["metrics/mAP_0.5"]
+        desired_metrics = ["metrics/mAP_0.5", "metrics/precision", "metrics/recall"]
         x = {k: full_dict[k] for k in desired_metrics if k in full_dict}
         
         if self.csv:
             file = self.save_dir / "results.csv"
-            n = len(x) + 2  # number of cols
+            n = 5  # number of cols
             s = ""
             if not file.exists():
-                header = (("%20s," * n) % tuple(["epoch", "time"] + list(x.keys()))).rstrip(",") + "\n"
+                header = (("%20s," * n) % tuple(["epoch", "time", "metrics/mAP_0.5", "metrics/precision", "metrics/recall"])).rstrip(",") + "\n"
                 s += header
 
             for attempt in range(5):
@@ -282,7 +282,11 @@ class Loggers:
                                 csv_values.append(f"{val:20.5g}")
 
                             epoch_str = f"{epoch:20.5g}"
-                            line = epoch_str + "," + time_left_str + "," + ",".join(csv_values) + "\n"
+                            map_str = f"{x['metrics/mAP_0.5']:20.5g}"
+                            precision_str = f"{x['metrics/precision']:20.5g}"
+                            recall_str = f"{x['metrics/recall']:20.5g}"
+
+                            line = epoch_str + "," + time_left_str + "," + map_str + "," + precision_str + "," + recall_str + "\n"
 
                             f.write(line)
                     break

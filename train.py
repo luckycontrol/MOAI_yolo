@@ -2,6 +2,7 @@ import os
 import argparse
 import shutil
 import torch
+import yaml
 
 from MoaiPipelineManager import Manager
 
@@ -10,8 +11,8 @@ def parse_args():
     
     parser.add_argument("--project", default="20250115")
     parser.add_argument("--subproject", default="test_sub")
-    parser.add_argument("--task", default="segment_test")
-    parser.add_argument("--version", default="v2")
+    parser.add_argument("--task", default="test_task")
+    parser.add_argument("--version", default="v3")
 
     args = parser.parse_args()
 
@@ -22,8 +23,17 @@ def main():
 
     manager = Manager(**vars(args))
 
-    hyp = manager.get_hyp_yaml()
+    hyp_path = manager.get_hyp_yaml_path()
+    data_path = manager.get_data_yaml_path()
+    with open(data_path, "r+") as f:
+        data = yaml.safe_load(f)
+        data["train"] = f"{manager.get_train_dataset_path()}/train/images"
+        data["val"] = f"{manager.get_train_dataset_path()}/valid/images"
 
+        f.seek(0)
+        yaml.dump(data, f)
+
+    hyp = manager.get_hyp_yaml()
     imgsz = hyp["imgsz"]
     batch_size = hyp["batch_size"]
     epochs = hyp["epochs"]
@@ -32,9 +42,6 @@ def main():
 
     weight_type = hyp["weights"]
     weights = f"{os.getcwd()}/weights/yolov5{weight_type}.pt"
-
-    hyp_path = manager.get_hyp_yaml_path()
-    data_path = manager.get_data_yaml_path()
 
     execute_file = "run_seg_train.py" if weight_type == "m_seg" else "run_train.py"
 
