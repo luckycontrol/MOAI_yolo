@@ -11,7 +11,7 @@ def parse_args():
     
     parser.add_argument("--project", default="20250115")
     parser.add_argument("--subproject", default="test_sub")
-    parser.add_argument("--task", default="test_task")
+    parser.add_argument("--task", default="segment_test")
     parser.add_argument("--version", default="v3")
 
     args = parser.parse_args()
@@ -30,7 +30,8 @@ def main():
         data["train"] = f"{manager.get_train_dataset_path()}/train/images"
         data["val"] = f"{manager.get_train_dataset_path()}/valid/images"
 
-        f.seek(0)
+    os.remove(data_path)
+    with open(data_path, "w") as f:
         yaml.dump(data, f)
 
     hyp = manager.get_hyp_yaml()
