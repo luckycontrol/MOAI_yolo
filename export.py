@@ -20,10 +20,6 @@ def main():
 
     manager = Manager(**vars(args))
 
-    export_end_file_path = manager.get_weight_folder_path() + "/export_end.txt"
-    if os.path.exists(export_end_file_path):
-        os.remove(export_end_file_path)
-
     weights = manager.get_best_weight_path()
     
     hyp = manager.get_train_result_hyp_yaml()
@@ -39,9 +35,6 @@ def main():
     "
 
     os.system(ocmd)
-
-    with open(export_end_file_path, "w") as f:
-        pass
 
 if __name__ == "__main__":
     main()
