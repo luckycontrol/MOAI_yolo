@@ -259,8 +259,18 @@ class Loggers:
         # Create dictionary with only desired metrics
         full_dict = dict(zip(self.keys, vals))
         desired_metrics = ["metrics/mAP_0.5", "metrics/precision", "metrics/recall"]
-        x = {k: full_dict[k] for k in desired_metrics if k in full_dict}
+        metrics = {k: full_dict[k] for k in desired_metrics if k in full_dict}
         
+        log_data = {
+            "epoch": epoch,
+            "time": time_left_str,
+            "metrics/mAP_0.5": metrics['metrics/mAP_0.5'],
+            "precision": metrics['metrics/precision'],
+            "recall": metrics['metrics/recall'],
+        }
+
+        self.logger.info(json.dumps(log_data))
+
         if self.csv:
             file = self.save_dir / "results.csv"
             n = 5  # number of cols
@@ -277,17 +287,11 @@ class Loggers:
                             if s:
                                 f.write(s)
 
-                            csv_values = []
-                            for val_key, val in x.items():
-                                csv_values.append(f"{val:20.5g}")
-
                             epoch_str = f"{epoch:20.5g}"
-                            map_str = f"{x['metrics/mAP_0.5']:20.5g}"
-                            precision_str = f"{x['metrics/precision']:20.5g}"
-                            recall_str = f"{x['metrics/recall']:20.5g}"
-
+                            map_str = f"{metrics['metrics/mAP_0.5']:20.5g}"
+                            precision_str = f"{metrics['metrics/precision']:20.5g}"
+                            recall_str = f"{metrics['metrics/recall']:20.5g}"
                             line = epoch_str + "," + time_left_str + "," + map_str + "," + precision_str + "," + recall_str + "\n"
-
                             f.write(line)
                     break
                 except Exception as e:
@@ -302,30 +306,6 @@ class Loggers:
             file = self.save_dir / "results.ndjson"
             with open(file, "a") as f:
                 print(json_data, file=f)
-
-        if self.tb:
-            for k, v in x.items():
-                if k == "time":
-                    continue
-
-                self.tb.add_scalar(k, v, epoch)
-        elif self.clearml:  # log to ClearML if TensorBoard not used
-            self.clearml.log_scalars(x, epoch)
-
-        if self.wandb:
-            if best_fitness == fi:
-                best_results = [epoch] + vals[3:7]
-                for i, name in enumerate(self.best_keys):
-                    self.wandb.wandb_run.summary[name] = best_results[i]  # log best results in the summary
-            self.wandb.log(x)
-            self.wandb.end_epoch()
-
-        if self.clearml:
-            self.clearml.current_epoch_logged_images = set()  # reset epoch image limit
-            self.clearml.current_epoch += 1
-
-        if self.comet_logger:
-            self.comet_logger.on_fit_epoch_end(x, epoch=epoch)
 
     def on_model_save(self, last, epoch, final_epoch, best_fitness, fi):
         """Callback that handles model saving events, logging to Weights & Biases or ClearML if enabled."""
