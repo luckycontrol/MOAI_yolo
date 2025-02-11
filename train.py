@@ -11,7 +11,7 @@ def parse_args():
     
     parser.add_argument("--project", default="20250115")
     parser.add_argument("--subproject", default="test_sub")
-    parser.add_argument("--task", default="segment_test")
+    parser.add_argument("--task", default="test_task")
     parser.add_argument("--version", default="v3")
 
     args = parser.parse_args()
@@ -24,6 +24,20 @@ def main():
     manager = Manager(**vars(args))
 
     hyp_path = manager.get_hyp_yaml_path()
+    unused_augment = ['degrees', 'translate', 'shear', 'perspective', 'Tmosaic', 'mixup', 'copy_paste']
+    hyp = manager.get_hyp_yaml()
+    for k in unused_augment:
+        hyp[k] = 0
+
+    with open(hyp_path, "w") as f:
+        yaml.dump(hyp, f)
+
+    imgsz       = hyp.get("imgsz")
+    batch_size  = hyp.get("batch_size")
+    epochs      = hyp.get("epochs")
+    weight_type = hyp.get("weights")
+    weights     = f"{os.getcwd()}/weights/yolov5{weight_type}.pt"
+
     data_path = manager.get_data_yaml_path()
     with open(data_path, "r+") as f:
         data = yaml.safe_load(f)
@@ -34,15 +48,7 @@ def main():
     with open(data_path, "w") as f:
         yaml.dump(data, f)
 
-    hyp = manager.get_hyp_yaml()
-    imgsz = hyp["imgsz"]
-    batch_size = hyp["batch_size"]
-    epochs = hyp["epochs"]
-    resume = hyp["resume"]
     device = '0' if torch.cuda.is_available() else 'cpu'
-
-    weight_type = hyp["weights"]
-    weights = f"{os.getcwd()}/weights/yolov5{weight_type}.pt"
 
     execute_file = "run_seg_train.py" if weight_type == "m_seg" else "run_train.py"
 
@@ -60,7 +66,7 @@ def main():
     --patience {epochs} \
     "
 
-    if resume:
+    if hyp.get("resume") is not None and hyp["resume"] == True:
         ocmd += f"--resume "
 
     os.system(ocmd)
