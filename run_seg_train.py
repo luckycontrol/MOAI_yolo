@@ -614,8 +614,8 @@ def main(opt, callbacks=Callbacks()):
     """Initializes training or evolution of YOLOv5 models based on provided configuration and options."""
     if RANK in {-1, 0}:
         print_args(vars(opt))
-        check_git_status()
-        check_requirements(ROOT / "requirements.txt")
+        # check_git_status()
+        # check_requirements(ROOT / "requirements.txt")
 
     # Resume
     if opt.resume and not opt.evolve:  # resume from specified or most recent last.pt

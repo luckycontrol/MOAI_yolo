@@ -329,7 +329,7 @@ def export_onnx(model, im, file, opset, dynamic, simplify, prefix=colorstr("ONNX
         export_onnx(model, im, file_path, opset=12, dynamic=True, simplify=True)
         ```
     """
-    check_requirements("onnx>=1.12.0")
+    # check_requirements("onnx>=1.12.0")
     import onnx
 
     LOGGER.info(f"\n{prefix} starting export with onnx {onnx.__version__}...")
@@ -371,7 +371,7 @@ def export_onnx(model, im, file, opset, dynamic, simplify, prefix=colorstr("ONNX
     if simplify:
         try:
             cuda = torch.cuda.is_available()
-            check_requirements(("onnxruntime-gpu" if cuda else "onnxruntime", "onnxslim"))
+            # check_requirements(("onnxruntime-gpu" if cuda else "onnxruntime", "onnxslim"))
             import onnxslim
 
             LOGGER.info(f"{prefix} slimming with onnxslim {onnxslim.__version__}...")
@@ -418,7 +418,7 @@ def export_openvino(file, metadata, half, int8, data, prefix=colorstr("OpenVINO:
         This will export the YOLOv5 model to OpenVINO with FP16 precision but without INT8 quantization, saving it to
         the specified file path.
     """
-    check_requirements("openvino-dev>=2023.0")  # requires openvino-dev: https://pypi.org/project/openvino-dev/
+    # check_requirements("openvino-dev>=2023.0")  # requires openvino-dev: https://pypi.org/project/openvino-dev/
     import openvino.runtime as ov  # noqa
     from openvino.tools import mo  # noqa
 
@@ -430,7 +430,7 @@ def export_openvino(file, metadata, half, int8, data, prefix=colorstr("OpenVINO:
     ov_model = mo.convert_model(f_onnx, model_name=file.stem, framework="onnx", compress_to_fp16=half)  # export
 
     if int8:
-        check_requirements("nncf>=2.5.0")  # requires at least version 2.5.0 to use the post-training quantization
+        # check_requirements("nncf>=2.5.0")  # requires at least version 2.5.0 to use the post-training quantization
         import nncf
         import numpy as np
 
@@ -511,7 +511,7 @@ def export_paddle(model, im, file, metadata, prefix=colorstr("PaddlePaddle:")):
         $ pip install paddlepaddle x2paddle
         ```
     """
-    check_requirements(("paddlepaddle", "x2paddle"))
+    # check_requirements(("paddlepaddle", "x2paddle"))
     import x2paddle
     from x2paddle.convert import pytorch2paddle
 
@@ -556,7 +556,7 @@ def export_coreml(model, im, file, int8, half, nms, mlmodel, prefix=colorstr("Co
         export_coreml(model, im, file, int8=False, half=False, nms=True, mlmodel=False)
         ```
     """
-    check_requirements("coremltools")
+    # check_requirements("coremltools")
     import coremltools as ct
 
     LOGGER.info(f"\n{prefix} starting export with coremltools {ct.__version__}...")
@@ -633,12 +633,12 @@ def export_engine(
         ```
     """
     assert im.device.type != "cpu", "export running on CPU but must be on GPU, i.e. `python export.py --device 0`"
-    try:
-        import tensorrt as trt
-    except Exception:
-        if platform.system() == "Linux":
-            check_requirements("nvidia-tensorrt", cmds="-U --index-url https://pypi.ngc.nvidia.com")
-        import tensorrt as trt
+    # try:
+    #     import tensorrt as trt
+    # except Exception:
+    #     if platform.system() == "Linux":
+    #         check_requirements("nvidia-tensorrt", cmds="-U --index-url https://pypi.ngc.nvidia.com")
+    #     import tensorrt as trt
 
     if trt.__version__[0] == "7":  # TensorRT 7 handling https://github.com/ultralytics/yolov5/issues/6012
         grid = model.model[-1].anchor_grid
@@ -753,13 +753,13 @@ def export_saved_model(
         ```
     """
     # YOLOv5 TensorFlow SavedModel export
-    try:
-        import tensorflow as tf
-    except Exception:
-        check_requirements(f"tensorflow{'' if torch.cuda.is_available() else '-macos' if MACOS else '-cpu'}<=2.15.1")
+    # try:
+    #     import tensorflow as tf
+    # except Exception:
+    #     check_requirements(f"tensorflow{'' if torch.cuda.is_available() else '-macos' if MACOS else '-cpu'}<=2.15.1")
 
-        import tensorflow as tf
-    from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
+    #     import tensorflow as tf
+    # from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
 
     from models.tf import TFModel
 
@@ -1004,7 +1004,7 @@ def export_tfjs(file, int8, prefix=colorstr("TensorFlow.js:")):
         export_tfjs(file, int8=False)
         ```
     """
-    check_requirements("tensorflowjs")
+    # check_requirements("tensorflowjs")
     import tensorflowjs as tfjs
 
     LOGGER.info(f"\n{prefix} starting export with tensorflowjs {tfjs.__version__}...")
