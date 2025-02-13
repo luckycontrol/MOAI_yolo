@@ -23,7 +23,7 @@ def train_ready_callback():
         "message": "학습 환경을 준비중입니다.",
     }
 
-    print(json.dumps(message))
+    print(json.dumps(message, ensure_ascii=False))
 
 def train_start_callback():
     message = {
@@ -31,7 +31,7 @@ def train_start_callback():
         "message": "모델 학습을 시작합니다."
     }
 
-    print(json.dumps(message))
+    print(json.dumps(message, ensure_ascii=False))
 
 def train_epoch_end_callback(log_vals, epoch, best_fitness, fi, time_left_str):
     full_dict = dict(zip(keys, log_vals))
@@ -48,10 +48,10 @@ def train_epoch_end_callback(log_vals, epoch, best_fitness, fi, time_left_str):
 
     message = {
         "status": "in_progress",
-        "message": json.dumps(log_data)
+        "message": log_data
     }
 
-    print(json.dumps(message))
+    print(json.dumps(message, ensure_ascii=False))
 
 def train_end_callback(last, best, epoch, results):
     message = {
@@ -59,4 +59,4 @@ def train_end_callback(last, best, epoch, results):
         "message": "모델 학습이 성공적으로 완료되었습니다."
     }
 
-    print(json.dumps(message))
+    print(json.dumps(message, ensure_ascii=False))

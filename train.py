@@ -21,7 +21,14 @@ def parse_args():
     parser.add_argument("--task", type=str, default="test_task")
     parser.add_argument("--version", type=str, default="v3")
 
-    return parser.parse_args
+    moai_args, remaining_args = parser.parse_known_args()
+
+    opt = parse_opt()
+
+    for k, v in vars(moai_args).items():
+        setattr(opt, k, v)
+
+    return opt, moai_args
 
 def setup_training_config(manager: Manager):
     hyp_path = manager.get_hyp_yaml_path()
@@ -46,28 +53,27 @@ def setup_training_config(manager: Manager):
     return hyp, hyp_path, data_path
 
 def main():
-    opt = parse_opt()
-
-    args = parse_args()
+    opt, args = parse_args()
     manager = Manager(**vars(args))
 
     hyp, hyp_path, data_path = setup_training_config(manager)
+    params = {
+        "imgsz"     : hyp.get("imgsz"),
+        "batch_size": hyp.get("batch_size"),
+        "epochs"    : hyp.get("epochs"),
+        "patience"  : hyp.get("epochs"),
+        "weights"   : f"{os.getcwd()}/weights/yolov5{hyp.get('weights')}.pt",
+        "device"    : '0' if torch.cuda.is_available() else 'cpu',
+        "data"      : data_path,
+        "hyp"       : hyp_path,
+        "project"   : f"{manager.location}/{manager.project}/{manager.subproject}/{manager.task}/{manager.version}",
+        "name"      : "training_result",
+        "optimizer" : "AdamW",
+        "resume"    : False
+    }
 
-    opt.imgsz = hyp.get("imgsz")
-    opt.batch_size = hyp.get("batch_size")
-    opt.epochs = hyp.get("epochs")
-    opt.weights = f"{os.getcwd()}/weights/yolov5{hyp.get('weights')}.pt"
-    opt.device = '0' if torch.cuda.is_available() else 'cpu'
-    opt.data = data_path
-    opt.hyp = hyp_path
-    opt.project = f"{manager.location}/{manager.project}/{manager.subproject}/{manager.task}/{manager.version}"
-    opt.name = "training_result"
-    opt.optimizer = "AdamW"
-    opt.patience = hyp.get("epochs")
-
-
-    if hyp.get("resume") is not None and hyp["resume"] == True:
-        opt.resume = True
+    for k, v in params.items():
+        setattr(opt, k, v)
 
     callbacks = Callbacks()
     callbacks.register_action(
