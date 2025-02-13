@@ -23,7 +23,7 @@ def parse_args():
 
     moai_args, remaining_args = parser.parse_known_args()
 
-    opt = parse_opt()
+    opt = parse_opt(known=True)
 
     for k, v in vars(moai_args).items():
         setattr(opt, k, v)
