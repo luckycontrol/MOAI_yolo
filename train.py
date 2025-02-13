@@ -16,15 +16,12 @@ from custom_callbacks import (
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument("--project", default="20250115")
-    parser.add_argument("--subproject", default="test_sub")
-    parser.add_argument("--task", default="test_task")
-    parser.add_argument("--version", default="v3")
+    parser.add_argument("--project", type=str, default="20250115")
+    parser.add_argument("--subproject", type=str, default="test_sub")
+    parser.add_argument("--task", type=str, default="test_task")
+    parser.add_argument("--version", type=str, default="v3")
 
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args
 
 def setup_training_config(manager: Manager):
     hyp_path = manager.get_hyp_yaml_path()
@@ -48,7 +45,7 @@ def setup_training_config(manager: Manager):
     
     return hyp, hyp_path, data_path
 
-if __name__ == "__main__":
+def main():
     opt = parse_opt()
 
     args = parse_args()
@@ -67,6 +64,7 @@ if __name__ == "__main__":
     opt.name = "training_result"
     opt.optimizer = "AdamW"
     opt.patience = hyp.get("epochs")
+
 
     if hyp.get("resume") is not None and hyp["resume"] == True:
         opt.resume = True
@@ -99,3 +97,6 @@ if __name__ == "__main__":
     src = f"{manager.get_training_result_folder_path()}/weights"
     dst = manager.get_weight_folder_path()
     shutil.move(src, dst)
+
+if __name__ == "__main__":
+    main()
