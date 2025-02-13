@@ -260,16 +260,6 @@ class Loggers:
         full_dict = dict(zip(self.keys, vals))
         desired_metrics = ["metrics/mAP_0.5", "metrics/precision", "metrics/recall"]
         metrics = {k: full_dict[k] for k in desired_metrics if k in full_dict}
-        
-        log_data = {
-            "epoch": epoch,
-            "time": time_left_str,
-            "metrics/mAP_0.5": metrics['metrics/mAP_0.5'],
-            "precision": metrics['metrics/precision'],
-            "recall": metrics['metrics/recall'],
-        }
-
-        self.logger.info(json.dumps(log_data))
 
         if self.csv:
             file = self.save_dir / "results.csv"
