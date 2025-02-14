@@ -34,10 +34,13 @@ import os
 import platform
 import sys
 import yaml
+import json
 
 from pathlib import Path
 
 import torch
+
+from custom_callbacks import inference_ready_callback, inference_start_callback, inference_end_callback
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -162,6 +165,8 @@ def run(
         run(source='data/videos/example.mp4', weights='yolov5s.pt', conf_thres=0.4, device='0')
         ```
     """
+    inference_ready_callback()
+    
     source = str(source)
     save_img = not nosave and not source.endswith(".txt")  # save inference images
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
@@ -181,6 +186,8 @@ def run(
     stride, names, pt = model.stride, model.names, model.pt
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
+    inference_start_callback()
+    
     # Dataloader
     bs = 1  # batch_size
     if webcam:
@@ -196,6 +203,7 @@ def run(
     # Run inference
     model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(device=device), Profile(device=device), Profile(device=device))
+    all_results = []  # Store all results for final callback
     for path, im, im0s, vid_cap, s in dataset:
         with dt[0]:
             im = torch.from_numpy(im).to(model.device)
@@ -316,6 +324,21 @@ def run(
                     if save_crop:
                         save_one_box(xyxy, imc, file=save_dir / "crops" / names[c] / f"{p.stem}.jpg", BGR=True)
 
+                # Store results for this image
+                image_results = []
+                for *xyxy, conf, cls in reversed(det):
+                    c = int(cls)  # integer class
+                    label = names[c] if hide_conf else f"{names[c]}"
+                    result = {
+                        "label": label,
+                        "confidence": float(conf),
+                        "bbox": xyxy2tlwh(im0.shape, [float(x) for x in xyxy])
+                    }
+                    image_results.append(result)
+                all_results.append({
+                    "image": Path(p).name,
+                    "detections": image_results
+                })
             # Stream results
             im0 = annotator.result()
             if view_img:
@@ -357,6 +380,10 @@ def run(
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
+    inference_end_callback(all_results)
+    
+    return all_results  # Return for potential further processing
+
 
 def parse_opt():
     """
@@ -373,6 +400,7 @@ def parse_opt():
         --device (str, optional): CUDA device, i.e., '0' or '0,1,2,3' or 'cpu'. Defaults to "".
         --view-img (bool, optional): Flag to display results. Defaults to False.
         --save-txt (bool, optional): Flag to save results to *.txt files. Defaults to False.
+        --save-format (int, optional): Whether to save boxes coordinates in YOLO format or Pascal-VOC format when save-txt is True, 0 for YOLO and 1 for Pascal-VOC. Defaults to 0.
         --save-csv (bool, optional): Flag to save results in CSV format. Defaults to False.
         --save-conf (bool, optional): Flag to save confidences in labels saved via --save-txt. Defaults to False.
         --save-crop (bool, optional): Flag to save cropped prediction boxes. Defaults to False.

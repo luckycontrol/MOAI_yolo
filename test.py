@@ -9,15 +9,12 @@ from MoaiPipelineManager import Manager
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    
-    parser.add_argument("--project", default="20250121")
-    parser.add_argument("--subproject", default="sub")
-    parser.add_argument("--task", default="seg")
-    parser.add_argument("--version", default="20250121182252175")
+    parser.add_argument("--project", type=str, default="20250115")
+    parser.add_argument("--subproject", type=str, default="test_sub")
+    parser.add_argument("--task", type=str, default="test_task")
+    parser.add_argument("--version", type=str, default="v1")
 
-    args = parser.parse_args()
-
-    return args
+    return parser.parse_args()
 
 def main():
     args = parse_args()

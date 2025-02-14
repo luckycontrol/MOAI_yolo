@@ -60,3 +60,45 @@ def train_end_callback(last, best, epoch, results):
     }
 
     print(json.dumps(message, ensure_ascii=False))
+
+def inference_ready_callback():
+    message = {
+        "status": "preparing",
+        "message": "추론 환경을 준비중입니다.",
+    }
+    print(json.dumps(message, ensure_ascii=False))
+
+def inference_start_callback():
+    message = {
+        "status": "start",
+        "message": "모델 추론을 시작합니다."
+    }
+    print(json.dumps(message, ensure_ascii=False))
+
+def inference_end_callback():
+    message = {
+        "status": "complete",
+        "message": "모델 추론이 완료되었습니다."
+    }
+    print(json.dumps(message, ensure_ascii=False))
+
+def export_ready_callback():
+    message = {
+        "status": "preparing",
+        "message": "모델 내보내기 준비중입니다."
+    }
+    print(json.dumps(message, ensure_ascii=False))
+
+def export_start_callback():
+    message = {
+        "status": "start",
+        "message": "모델 내보내기 시작"
+    }
+    print(json.dumps(message, ensure_ascii=False))
+
+def export_end_callback():
+    message = {
+        "status": "complete",
+        "message": "모델 내보내기가 완료되었습니다."
+    }
+    print(json.dumps(message, ensure_ascii=False))

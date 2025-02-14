@@ -19,9 +19,9 @@ def parse_args():
     parser.add_argument("--project", type=str, default="20250115")
     parser.add_argument("--subproject", type=str, default="test_sub")
     parser.add_argument("--task", type=str, default="test_task")
-    parser.add_argument("--version", type=str, default="v3")
+    parser.add_argument("--version", type=str, default="v1")
 
-    moai_args, remaining_args = parser.parse_known_args()
+    moai_args, _ = parser.parse_known_args()
 
     opt = parse_opt(known=True)
 

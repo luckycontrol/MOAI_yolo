@@ -60,6 +60,8 @@ import pandas as pd
 import torch
 from torch.utils.mobile_optimizer import optimize_for_mobile
 
+from custom_callbacks import export_ready_callback, export_start_callback, export_end_callback
+
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
@@ -1378,6 +1380,8 @@ def run(
     jit, onnx, xml, engine, coreml, saved_model, pb, tflite, edgetpu, tfjs, paddle = flags  # export booleans
     file = Path(url2file(weights) if str(weights).startswith(("http:/", "https:/")) else weights)  # PyTorch weights
 
+    export_ready_callback()
+
     # Load PyTorch model
     device = select_device(device)
     if half:
@@ -1413,6 +1417,8 @@ def run(
     LOGGER.info(f"\n{colorstr('PyTorch:')} starting from {file} with output shape {shape} ({file_size(file):.1f} MB)")
 
     # Exports
+    export_start_callback()
+
     f = [""] * len(fmts)  # exported filenames
     warnings.filterwarnings(action="ignore", category=torch.jit.TracerWarning)  # suppress TracerWarning
     if jit:  # TorchScript
@@ -1458,6 +1464,8 @@ def run(
         f[10], _ = export_paddle(model, im, file, metadata)
 
     # Finish
+    export_end_callback()
+
     f = [str(x) for x in f if x]  # filter out '' and None
     if any(f):
         cls, det, seg = (isinstance(model, x) for x in (ClassificationModel, DetectionModel, SegmentationModel))  # type
