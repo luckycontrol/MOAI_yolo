@@ -43,7 +43,7 @@ def main():
     args = parse_args()
     manager = Manager(**vars(args))
 
-    source, imgsz, weight_type, weights, device, _ = setup_testing_config(manager)
+    source, imgsz, weight_type, weights, device, opt = setup_testing_config(manager)
     
     if weight_type == "m_seg":
         opt = parse_seg_test_opt()
