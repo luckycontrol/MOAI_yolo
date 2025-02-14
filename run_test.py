@@ -380,7 +380,7 @@ def run(
     if update:
         strip_optimizer(weights[0])  # update model (to fix SourceChangeWarning)
 
-    inference_end_callback(all_results)
+    inference_end_callback()
     
     return all_results  # Return for potential further processing
 
