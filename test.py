@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 import argparse
 import shutil
@@ -30,7 +31,7 @@ def setup_testing_config(manager: Manager):
     weights = manager.get_best_weight_path()
     device = '0' if torch.cuda.is_available() else 'cpu'
 
-    return source, imgsz, weight_type, weights, device, opt
+    return source, imgsz, weight_type, weights, device
 
 def organize_test_results(test_result_folder_path: str):
     txt_files = glob.glob(f"{test_result_folder_path}/labels/*.txt")
@@ -41,9 +42,12 @@ def organize_test_results(test_result_folder_path: str):
 
 def main():
     args = parse_args()
+
+    sys.argv = [sys.argv[0]]
+
     manager = Manager(**vars(args))
 
-    source, imgsz, weight_type, weights, device, opt = setup_testing_config(manager)
+    source, imgsz, weight_type, weights, device = setup_testing_config(manager)
     
     if weight_type == "m_seg":
         opt = parse_seg_test_opt()

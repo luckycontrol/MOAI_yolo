@@ -385,7 +385,7 @@ def run(
     return all_results  # Return for potential further processing
 
 
-def parse_opt():
+def parse_opt(known=False):
     """
     Parse command-line arguments for YOLOv5 detection, allowing custom inference options and model configurations.
 
@@ -465,7 +465,7 @@ def parse_opt():
     parser.add_argument("--half", action="store_true", help="use FP16 half-precision inference")
     parser.add_argument("--dnn", action="store_true", help="use OpenCV DNN for ONNX inference")
     parser.add_argument("--vid-stride", type=int, default=1, help="video frame-rate stride")
-    opt = parser.parse_args()
+    opt, _ = parser.parse_known_args()
     opt.imgsz *= 2 if len(opt.imgsz) == 1 else 1  # expand
     print_args(vars(opt))
     return opt

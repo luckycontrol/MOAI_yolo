@@ -29,7 +29,7 @@ def main():
 
     weights, imgsz, batch_size, opset = setup_export_config(manager)
     
-    opt = parse_export_opt()
+    opt = parse_export_opt(known=True)
 
     # Update opt with our parameters
     params = {
